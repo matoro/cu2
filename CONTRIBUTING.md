@@ -17,7 +17,7 @@ with a 79 character limit.
 Imports and symbol definitions (such as functions, or class methods) should be
 listed in alphabetical order.
 
-Currently, cum supports Python versions >= 3.3. Please do not break backwards
+Currently, cu2 supports Python versions >= 3.3. Please do not break backwards
 compatibility with older Python versions unless you have a good reason to.
 
 Tests
@@ -35,7 +35,7 @@ by the unit tests for login data:
 If you are lazy and have [jq](https://stedolan.github.io/jq/) installed,
 `source` [this script](https://gist.github.com/CounterPillow/9e6ea93bd0e9b94b8de84326db46fee4)
 before running tests to have the environment variables set to what you use in
-your cum config.
+your cu2 config.
 
 When adding new code paths, please also add tests to cover them.
 

@@ -1,8 +1,8 @@
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLIEdit(cumtest.CumCLITest):
+class TestCLIEdit(cu2test.Cu2CLITest):
     FOLLOW = {'url': ('https://manga.madokami.al/Manga/M/MO/MOLE/'
                       'Molester%20Man'),
               'alias': 'molester-man', 'name': 'Molester Man'}

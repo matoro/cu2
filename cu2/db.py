@@ -1,4 +1,4 @@
-from cum import config, output, sanity
+from cu2 import config, output, sanity
 from math import sqrt
 from natsort import humansorted
 from shutil import copyfile
@@ -228,28 +228,28 @@ class Chapter(Base):
             'api_id': self.api_id
         }
         if parse.netloc in ('mangadex.com', 'mangadex.org'):
-            from cum.scrapers.mangadex import MangadexChapter
+            from cu2.scrapers.mangadex import MangadexChapter
             return MangadexChapter(**kwargs)
         if parse.netloc == 'dynasty-scans.com':
-            from cum.scrapers.dynastyscans import DynastyScansChapter
+            from cu2.scrapers.dynastyscans import DynastyScansChapter
             return DynastyScansChapter(**kwargs)
         if parse.netloc == 'manga.madokami.al':
-            from cum.scrapers.madokami import MadokamiChapter
+            from cu2.scrapers.madokami import MadokamiChapter
             return MadokamiChapter(**kwargs)
         if parse.netloc == 'kobato.hologfx.com':
-            from cum.scrapers.dokireader import DokiReaderChapter
+            from cu2.scrapers.dokireader import DokiReaderChapter
             return DokiReaderChapter(**kwargs)
         if parse.netloc == 'www.yuri-ism.net':
-            from cum.scrapers.yuriism import YuriismChapter
+            from cu2.scrapers.yuriism import YuriismChapter
             return YuriismChapter(**kwargs)
         if parse.netloc == 'mangaseeonline.us':
-            from cum.scrapers.mangasee import MangaseeChapter
+            from cu2.scrapers.mangasee import MangaseeChapter
             return MangaseeChapter(**kwargs)
         if parse.netloc in ('www.mangahere.cc', 'm.mangahere.cc'):
-            from cum.scrapers.mangahere import MangahereChapter
+            from cu2.scrapers.mangahere import MangahereChapter
             return MangahereChapter(**kwargs)
         if parse.netloc == 'manganelo.com':
-            from cum.scrapers.manganelo import ManganeloChapter
+            from cu2.scrapers.manganelo import ManganeloChapter
             return ManganeloChapter(**kwargs)
 
 class Group(Base):
@@ -266,15 +266,15 @@ class Group(Base):
 
 
 def backup_database():
-    """Backs up the database file to a file called cum.db.bak."""
-    db_path = os.path.join(config.cum_dir, 'cum.db')
-    backup_path = os.path.join(config.cum_dir, 'cum.db.bak')
+    """Backs up the database file to a file called cu2.db.bak."""
+    db_path = os.path.join(config.cu2_dir, 'cu2.db')
+    backup_path = os.path.join(config.cu2_dir, 'cu2.db.bak')
     copyfile(db_path, backup_path)
 
 
 def initialize():
     global db_path, engine, session
-    db_path = os.path.join(config.cum_dir, 'cum.db')
+    db_path = os.path.join(config.cu2_dir, 'cu2.db')
     db_url = sqlalchemy.engine.url.URL('sqlite', database=db_path)
     engine = create_engine(db_url)
     if not os.path.exists(db_path):
@@ -293,5 +293,5 @@ def test_database():
             message = ' '.join([click.style(err_target, bold=True), err_msg])
             output.warning(message)
         output.error('Database has failed sanity check; '
-                     'run `cum repair-db` to repair database')
+                     'run `cu2 repair-db` to repair database')
         exit(1)

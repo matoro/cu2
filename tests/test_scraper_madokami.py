@@ -1,10 +1,10 @@
-from cum import config, exceptions
-import cumtest
+from cu2 import config, exceptions
+import cu2test
 import os
 import unittest
 
 
-class TestMadokami(cumtest.CumTest):
+class TestMadokami(cu2test.Cu2Test):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         NO_MADOKAMI_LOGIN = self.no_madokami_login
@@ -12,7 +12,7 @@ class TestMadokami(cumtest.CumTest):
     def setUp(self):
         super().setUp()
         global madokami
-        from cum.scrapers import madokami
+        from cu2.scrapers import madokami
 
     def series_information_tester(self, data):
         series = madokami.MadokamiSeries(data['url'])
@@ -31,7 +31,7 @@ class TestMadokami(cumtest.CumTest):
             self.assertIs(chapter.directory, None)
         self.assertEqual(len(data['chapters']), 0)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_chapter_filename_no_group(self):
         URL = ('https://manga.madokami.al/Manga/_/__/__DA/7-Daime%20no%20'
                'Tomari%21/7-Daime%20no%20Tomari%21%20v01%20c01.zip')
@@ -53,7 +53,7 @@ class TestMadokami(cumtest.CumTest):
         with self.assertRaises(exceptions.LoginError):
             madokami.MadokamiChapter.from_url(URL)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_chapter_100_dollar_too_cheap(self):
         URL = ('https://manga.madokami.al/Manga/Oneshots/100%20Dollar%20wa%20'
                'Yasu%20Sugiru/100%24%20is%20Too%20Cheap%20%5BYAMAMOTO%20Kazune'
@@ -75,7 +75,7 @@ class TestMadokami(cumtest.CumTest):
         chapter.download()
         self.assertTrue(os.path.isfile(path))
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_name_fallback(self):
         NAME = '!Koukaku no Pandora - Ghost Urn [Seven Seas]'
         URL = ('https://manga.madokami.al/Manga/K/KO/KOUK/Koukaku%20no%20'
@@ -84,7 +84,7 @@ class TestMadokami(cumtest.CumTest):
         series = madokami.MadokamiSeries(URL)
         self.assertEqual(series.name, NAME)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_series_kami_nomi(self):
         data = {
             'alias': 'kami-nomi-zo-shiru-sekai',
@@ -101,7 +101,7 @@ class TestMadokami(cumtest.CumTest):
         }
         self.series_information_tester(data)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_series_medaka_box(self):
         data = {
             'alias': 'medaka-box',

@@ -1,8 +1,8 @@
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLIChapters(cumtest.CumCLITest):
+class TestCLIChapters(cu2test.Cu2CLITest):
     def test_chapters(self):
         FOLLOW = {'url': ('https://manga.madokami.al/Manga/D/DA/DATE/Date'
                           '%20a%20Live'),

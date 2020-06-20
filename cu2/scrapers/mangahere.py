@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from cum import config, exceptions, output
-from cum.scrapers.base import BaseChapter, BaseSeries, download_pool
+from cu2 import config, exceptions, output
+from cu2.scrapers.base import BaseChapter, BaseSeries, download_pool
 from functools import partial
 from jsbeautifier import beautify
 from json import loads
@@ -107,7 +107,7 @@ class MangahereChapter(BaseChapter):
         chrome_headers["x-requested-with"] = "XMLHttpRequest"
         data = self.session.get(data_url, headers = chrome_headers)
         if data.text == "":
-            raise cum.exceptions.ScrapingError
+            raise cu2.exceptions.ScrapingError
         try:
             data_clean = beautify(data.text)
             if not getattr(self, "pvalue", None):

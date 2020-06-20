@@ -1,16 +1,16 @@
-from cum import config
-from cumtest import CumTest
+from cu2 import config
+from cu2test import Cu2Test
 import os
 import tempfile
 import unittest
 import zipfile
 
 
-class TestDynastyScans(CumTest):
+class TestDynastyScans(Cu2Test):
     def setUp(self):
         super().setUp()
         global dynastyscans
-        from cum.scrapers import dynastyscans
+        from cu2.scrapers import dynastyscans
 
     def test_chapter_information_shikinami_doujin(self):
         ALIAS = 'a-doujin-where-shikinami-became-the-secretary-ship'

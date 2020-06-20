@@ -2,8 +2,8 @@ from requests.exceptions import ConnectionError
 from sqlalchemy.exc import IntegrityError as DatabaseIntegrityError
 
 
-class CumException(Exception):
-    """Base class for all cum exceptions."""
+class Cu2Exception(Exception):
+    """Base class for all cu2 exceptions."""
 
     def __init__(self, message=''):
         self.message = message
@@ -12,16 +12,16 @@ class CumException(Exception):
         return repr(self.message)
 
 
-class LoginError(CumException):
+class LoginError(Cu2Exception):
     pass
 
 
-class ScrapingError(CumException):
+class ScrapingError(Cu2Exception):
     pass
 
 
-class ConfigError(CumException):
-    """Exception that is thrown when cum encounters a malformed configuration
+class ConfigError(Cu2Exception):
+    """Exception that is thrown when cu2 encounters a malformed configuration
     file. Accepts a string representing the raw text of the configuration file,
     the cursor position as a (row, column) tuple and a message.
     """

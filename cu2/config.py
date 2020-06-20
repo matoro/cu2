@@ -1,4 +1,4 @@
-from cum import exceptions
+from cu2 import exceptions
 import threading
 import click
 import json
@@ -130,17 +130,17 @@ def get():
 
 
 def initialize(directory=None):
-    """Initializes the cum directory and config file either with specified
-    directory or ~/.cum.
+    """Initializes the cu2 directory and config file either with specified
+    directory or ~/.cu2.
     """
-    global _config, config_path, cum_dir
+    global _config, config_path, cu2_dir
     if directory:
-        cum_dir = directory
+        cu2_dir = directory
     elif sys.platform in ['cygwin', 'win32']:
-        cum_dir = os.path.join(os.environ['APPDATA'], 'cum')
+        cu2_dir = os.path.join(os.environ['APPDATA'], 'cu2')
     else:
-        cum_dir = os.path.join(os.environ['HOME'], '.cum')
-    if not os.path.exists(cum_dir):
-        os.mkdir(cum_dir)
-    config_path = os.path.join(cum_dir, 'config.json')
+        cu2_dir = os.path.join(os.environ['HOME'], '.cu2')
+    if not os.path.exists(cu2_dir):
+        os.mkdir(cu2_dir)
+    config_path = os.path.join(cu2_dir, 'config.json')
     _config = BaseConfig()

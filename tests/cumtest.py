@@ -1,13 +1,13 @@
 from click.testing import CliRunner
-from cum import config, cum
+from cu2 import config, cu2
 from shutil import copyfile
 import os
 import tempfile
 import unittest
 
 
-class CumTest(unittest.TestCase):
-    """Base class for all cum test cases."""
+class Cu2Test(unittest.TestCase):
+    """Base class for all cu2 test cases."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.madokami_password = os.environ.get('MADOKAMI_PASSWORD', None)
@@ -26,7 +26,7 @@ class CumTest(unittest.TestCase):
         """Copies a pre-defined broken database into the current directory."""
         test_directory = os.path.dirname(os.path.realpath(__file__))
         broken_db_path = os.path.join(test_directory, 'broken_database.db')
-        target_db_path = os.path.join(self.directory.name, 'cum.db')
+        target_db_path = os.path.join(self.directory.name, 'cu2.db')
         copyfile(broken_db_path, target_db_path)
 
     @property
@@ -43,12 +43,12 @@ class CumTest(unittest.TestCase):
         self.runner = CliRunner()
 
 
-class CumCLITest(CumTest):
+class Cu2CLITest(Cu2Test):
     def setUp(self):
         super().setUp()
         self.runner = CliRunner()
         global scrapers
-        from cum import db, scrapers
+        from cu2 import db, scrapers
         self.db = db
         self.scrapers = scrapers
         self.db.initialize()
@@ -86,9 +86,9 @@ class CumCLITest(CumTest):
     def invoke(self, *arguments, **kwargs):
         """Alias for the CliRunner invoke using default arguments needed for testing.
         """
-        default_args = ['--cum-directory', self.directory.name]
+        default_args = ['--cu2-directory', self.directory.name]
         args = default_args + list(arguments)
-        return self.runner.invoke(cum.cli, args, **kwargs)
+        return self.runner.invoke(cu2.cli, args, **kwargs)
 
 
 def skipIfNoMadokamiLogin(test):

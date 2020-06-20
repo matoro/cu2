@@ -1,14 +1,14 @@
-from cum import exceptions
-from cumtest import CumTest
+from cu2 import exceptions
+from cu2test import Cu2Test
 import os
 import zipfile
 
 
-class TestDokiReader(CumTest):
+class TestDokiReader(Cu2Test):
     def setUp(self):
         super().setUp()
         global dokireader
-        from cum.scrapers import dokireader
+        from cu2.scrapers import dokireader
 
     def test_chapter_technobreak_company_1(self):
         URL = ('https://kobato.hologfx.com/reader/read/'

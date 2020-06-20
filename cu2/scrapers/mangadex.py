@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from cum import config, exceptions, output
-from cum.scrapers.base import BaseChapter, BaseSeries, download_pool
+from cu2 import config, exceptions, output
+from cu2.scrapers.base import BaseChapter, BaseSeries, download_pool
 from functools import partial
 from mimetypes import guess_type
 from urllib.parse import urljoin, urlparse
@@ -10,7 +10,7 @@ import concurrent.futures
 import re
 import requests
 import json
-from cum.version import __version__
+from cu2.version import __version__
 
 
 class MangadexSeries(BaseSeries):
@@ -19,7 +19,7 @@ class MangadexSeries(BaseSeries):
     )
     # TODO remove when there are properly spaced api calls
     spam_failures = 0
-    headers = {"User-Agent": "cum/{}".format(__version__)}
+    headers = {"User-Agent": "cu2/{}".format(__version__)}
 
     def __init__(self, url, **kwargs):
         super().__init__(url, **kwargs)

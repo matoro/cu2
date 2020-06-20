@@ -1,10 +1,10 @@
-from cum import config
+from cu2 import config
 from unittest import mock
-import cumtest
+import cu2test
 import os
 
 
-class TestCLIDownload(cumtest.CumCLITest):
+class TestCLIDownload(cu2test.Cu2CLITest):
     def test_download(self):
         CHAPTERS = [
             {'url': ('https://manga.madokami.al/Manga/G/GO/GOOD/Goodbye%2C%20'

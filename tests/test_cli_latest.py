@@ -1,10 +1,10 @@
 from unittest import mock
-import cumtest
+import cu2test
 import datetime
 import time
 
 
-class TestCLILatest(cumtest.CumCLITest):
+class TestCLILatest(cu2test.Cu2CLITest):
     SERIES_KWARGS = {'url': ('https://manga.madokami.al/Manga/K/KA/KANG/'
                              'Kangoku%20Gakuen'),
                      'alias': 'kangoku-gakuen', 'name': 'Kangoku Gakuen'}

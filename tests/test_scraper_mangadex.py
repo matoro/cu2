@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
-from cum import config, exceptions
+from cu2 import config, exceptions
 from urllib.parse import urljoin
-import cumtest
+import cu2test
 import os
 import re
 import requests
@@ -17,13 +17,13 @@ def language_filter(a):
     except TypeError:
         return None
 
-class TestMangadex(cumtest.CumTest):
+class TestMangadex(cu2test.Cu2Test):
     MANGADEX_URL = 'https://mangadex.org/'
 
     def setUp(self):
         super().setUp()
         global mangadex
-        from cum.scrapers import mangadex
+        from cu2.scrapers import mangadex
 
     def tearDown(self):
         self.directory.cleanup()

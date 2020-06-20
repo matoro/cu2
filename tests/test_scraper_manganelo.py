@@ -1,23 +1,23 @@
 from bs4 import BeautifulSoup
-from cum import config, exceptions
+from cu2 import config, exceptions
 from nose.tools import nottest
 from urllib.parse import urljoin
 from warnings import filterwarnings
-import cumtest
+import cu2test
 import os
 import requests
 import unittest
 import zipfile
 
 
-class TestManganelo(cumtest.CumTest):
+class TestManganelo(cu2test.Cu2Test):
     MANGANELO_URL = 'https://manganelo.com/genre-all'
 
     def setUp(self):
         super().setUp()
         global manganelo
         filterwarnings(action = "ignore", message = "unclosed", category = ResourceWarning)
-        from cum.scrapers import manganelo
+        from cu2.scrapers import manganelo
 
     def tearDown(self):
         self.directory.cleanup()

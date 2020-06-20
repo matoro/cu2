@@ -1,8 +1,8 @@
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLIFollows(cumtest.CumCLITest):
+class TestCLIFollows(cu2test.Cu2CLITest):
     def test_follows(self):
         FOLLOWS = [
             {'url': ('https://manga.madokami.al/Manga/B/B_/B_GA/B%20Gata%20H'

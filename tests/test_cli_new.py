@@ -1,9 +1,9 @@
-from cum import config
+from cu2 import config
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLINew(cumtest.CumCLITest):
+class TestCLINew(cu2test.Cu2CLITest):
     CHAPTERS = [
         {'url': 'https://dynasty-scans.com/chapters/nijipuri_ch01',
          'chapter': '1'},
@@ -89,7 +89,7 @@ class TestCLINew(cumtest.CumCLITest):
                     '(manga.madokami.com -> manga.madokami.al)',
                     'chapters has entries with incorrect domain '
                     '(manga.madokami.com -> manga.madokami.al)',
-                    'Database has failed sanity check; run `cum repair-db` '
+                    'Database has failed sanity check; run `cu2 repair-db` '
                     'to repair database']
         SERIES_URL = 'https://manga.madokami.al/Manga/O/OJ/OJOJ/Ojojojo'
         CHAPTER_URL = ('https://manga.madokami.al/Manga/O/OJ/OJOJ/Ojojojo/'

@@ -1,15 +1,15 @@
-from cum import sanity
-import cumtest
+from cu2 import sanity
+import cu2test
 import os
 
 
-class TestCLIRepairDB(cumtest.CumCLITest):
+class TestCLIRepairDB(cu2test.Cu2CLITest):
     def test_repair_db(self):
-        MESSAGES = ['Backing up database to cum.db.bak',
+        MESSAGES = ['Backing up database to cu2.db.bak',
                     'Running database repair']
 
         self.copy_broken_database()
-        backup_database = os.path.join(self.directory.name, 'cum.db.bak')
+        backup_database = os.path.join(self.directory.name, 'cu2.db.bak')
 
         result = self.invoke('repair-db')
         self.assertTrue(os.path.isfile(backup_database))

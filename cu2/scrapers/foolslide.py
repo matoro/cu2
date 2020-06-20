@@ -1,6 +1,6 @@
 from abc import ABCMeta
-from cum import config, exceptions
-from cum.scrapers.base import BaseChapter, BaseSeries, download_pool
+from cu2 import config, exceptions
+from cu2.scrapers.base import BaseChapter, BaseSeries, download_pool
 from functools import partial
 from tempfile import NamedTemporaryFile
 from urllib.parse import urljoin, urlparse

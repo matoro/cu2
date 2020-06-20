@@ -1,10 +1,10 @@
-from cum import config
+from cu2 import config
 from unittest import mock
-import cumtest
+import cu2test
 import os
 
 
-class TestCLIFollow(cumtest.CumCLITest):
+class TestCLIFollow(cu2test.Cu2CLITest):
     def test_follow_dokireader(self):
         URL = 'https://kobato.hologfx.com/reader/series/new_game/'
         MESSAGE = 'Adding follow for New Game! (new-game)'
@@ -76,7 +76,7 @@ class TestCLIFollow(cumtest.CumCLITest):
         self.assertEqual(result.exit_code, 0)
         self.assertIn(MESSAGE, result.output)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_follow_madokami(self):
         URL = 'https://manga.madokami.al/Manga/A/AK/AKUM/Akuma%20no%20Riddle'
         MESSAGE = 'Adding follow for Akuma no Riddle (akuma-no-riddle)'
@@ -97,7 +97,7 @@ class TestCLIFollow(cumtest.CumCLITest):
         self.assertEqual(result.exit_code, 0)
         self.assertIn(MESSAGE, result.output)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_follow_non_unique_alias(self):
         URLS = ['https://kobato.hologfx.com/reader/series/new_game/',
                 'https://manga.madokami.al/Manga/N/NE/NEW_/New%20Game%21']
@@ -115,7 +115,7 @@ class TestCLIFollow(cumtest.CumCLITest):
         for alias in ALIASES:
             self.assertIn(alias, [x.alias for x in follows])
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_follow_non_unique_alias_with_unfollow(self):
         URLS = ['https://kobato.hologfx.com/reader/series/new_game/',
                 'https://manga.madokami.al/Manga/N/NE/NEW_/New%20Game%21']

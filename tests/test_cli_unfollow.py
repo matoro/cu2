@@ -1,8 +1,8 @@
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLIUnfollow(cumtest.CumCLITest):
+class TestCLIUnfollow(cu2test.Cu2CLITest):
     def test_unfollow(self):
         FOLLOW = {'url': 'http://dynasty-scans.com/series/'
                          'inugami_san_and_nekoyama_san',

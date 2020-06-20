@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-from cum import config, exceptions, output, version
+from cu2 import config, exceptions, output, version
 from functools import wraps
 import click
 import concurrent.futures
 
 
-class CumGroup(click.Group):
+class Cu2Group(click.Group):
     def command(self, check_db=True, *args, **kwargs):
         def decorator(f):
             @wraps(f)
@@ -13,7 +13,7 @@ class CumGroup(click.Group):
                 if check_db:
                     db.test_database()
                 return f(*args, **kwargs)
-            return super(CumGroup, self).command(*args, **kwargs)(wrapper)
+            return super(Cu2Group, self).command(*args, **kwargs)(wrapper)
         return decorator
 
 
@@ -25,20 +25,20 @@ def edit_defaults():
             param.default = config.get().relative_latest
 
 
-@click.command(cls=CumGroup)
-@click.option('--cum-directory',
-              help='Directory used by cum to store application files.')
+@click.command(cls=Cu2Group)
+@click.option('--cu2-directory',
+              help='Directory used by cu2 to store application files.')
 @click.version_option(version=version.__version__,
                       message=version.version_string())
-def cli(cum_directory=None):
+def cli(cu2_directory=None):
     global db, output, sanity, utility
-    from cum import output
+    from cu2 import output
     try:
-        config.initialize(directory=cum_directory)
+        config.initialize(directory=cu2_directory)
     except exceptions.ConfigError as e:
         output.configuration_error(e)
         exit(1)
-    from cum import db, sanity, utility
+    from cu2 import db, sanity, utility
     db.initialize()
     edit_defaults()
 
@@ -365,7 +365,7 @@ def repair_db():
     sanity_tester = sanity.DatabaseSanity(db.Base, db.engine)
     sanity_tester.test()
     if sanity_tester.errors:
-        output.series('Backing up database to cum.db.bak')
+        output.series('Backing up database to cu2.db.bak')
         db.backup_database()
         output.series('Running database repair')
         for error in sanity_tester.errors:

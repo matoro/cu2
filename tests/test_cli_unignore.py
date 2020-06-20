@@ -1,8 +1,8 @@
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLIUnignore(cumtest.CumCLITest):
+class TestCLIUnignore(cu2test.Cu2CLITest):
     def setUp(self):
         super().setUp()
         CHAPTERS = [

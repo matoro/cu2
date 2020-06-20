@@ -1,8 +1,8 @@
 from unittest import mock
-import cumtest
+import cu2test
 
 
-class TestCLIOpen(cumtest.CumCLITest):
+class TestCLIOpen(cu2test.Cu2CLITest):
     def test_open(self):
         FOLLOW = {'url': 'https://manga.madokami.al/Manga/B/BL/BLOO/Blood%2B',
                   'alias': 'blood'}

@@ -1,10 +1,10 @@
-from cum import config
+from cu2 import config
 from unittest import mock
-import cumtest
+import cu2test
 import datetime
 
 
-class TestCLIUpdate(cumtest.CumCLITest):
+class TestCLIUpdate(cu2test.Cu2CLITest):
     def test_update(self):
         FOLLOWS = [
             {'url': 'https://dynasty-scans.com/series/himegoto_1',

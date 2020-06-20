@@ -1,10 +1,10 @@
-from cum import config
+from cu2 import config
 from unittest import mock
-import cumtest
+import cu2test
 import os
 
 
-class TestCLIGet(cumtest.CumCLITest):
+class TestCLIGet(cu2test.Cu2CLITest):
     def test_get_alias_invalid(self):
         MESSAGE = 'Invalid selection "alias,1"'
 

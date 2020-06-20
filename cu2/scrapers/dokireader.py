@@ -1,4 +1,4 @@
-from cum.scrapers.foolslide import FoOlSlideChapter, FoOlSlideSeries
+from cu2.scrapers.foolslide import FoOlSlideChapter, FoOlSlideSeries
 import re
 
 

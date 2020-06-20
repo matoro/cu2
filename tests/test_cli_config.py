@@ -1,9 +1,9 @@
-from cum import config
-from cum import exceptions
-import cumtest
+from cu2 import config
+from cu2 import exceptions
+import cu2test
 
 
-class TestCLIConfig(cumtest.CumCLITest):
+class TestCLIConfig(cu2test.Cu2CLITest):
     def test_config_corrupt(self):
         self.copy_broken_config()
         with self.assertRaises(exceptions.ConfigError):
@@ -24,7 +24,7 @@ class TestCLIConfig(cumtest.CumCLITest):
         for message in MESSAGES:
             self.assertIn(message, result.output)
 
-    @cumtest.skipIfNoMadokamiLogin
+    @cu2test.skipIfNoMadokamiLogin
     def test_config_get(self):
         MESSAGES = ['download_directory = ' + config.get().download_directory,
                     'madokami.password = ' + config.get().madokami.password,

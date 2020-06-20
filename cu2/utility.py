@@ -1,5 +1,5 @@
-from cum import db, config, output
-from cum.scrapers import chapter_scrapers, series_scrapers
+from cu2 import db, config, output
+from cu2.scrapers import chapter_scrapers, series_scrapers
 import click
 import datetime
 import re
@@ -7,7 +7,7 @@ import re
 
 def chapter_by_url(url):
     """Helper function that iterates through the chapter scrapers defined in
-    cum.scrapers.__init__ and returns an initialized chapter object when it
+    cu2.scrapers.__init__ and returns an initialized chapter object when it
     matches the URL regex.
     """
     for Chapter in chapter_scrapers:
@@ -16,7 +16,7 @@ def chapter_by_url(url):
 
 
 def list_new():
-    """Helper method used in multiple cum commands to print out the new chapter
+    """Helper method used in multiple cu2 commands to print out the new chapter
     details for each series. Has two possible styles for displaying the
     information: compact and normal.
     """
@@ -63,7 +63,7 @@ def print_new_normal(items):
 
 def series_by_url(url):
     """Helper function that iterates through the series scrapers defined in
-    cum.scrapers.__init__ and returns an initialized series object when it
+    cu2.scrapers.__init__ and returns an initialized series object when it
     matches the URL regex.
     """
     for Series in series_scrapers:
@@ -72,7 +72,7 @@ def series_by_url(url):
 
 
 def set_ignored(mark_ignored, alias, chapters):
-    """Helper function for `cum ignore` and `cum unignore` commands, which will
+    """Helper function for `cu2 ignore` and `cu2 unignore` commands, which will
     either ignore chapters if mark_ignored is True or unignore chapters if
     mark_ignored is False.
     """

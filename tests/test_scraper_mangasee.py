@@ -1,21 +1,21 @@
 from bs4 import BeautifulSoup
-from cum import config, exceptions
+from cu2 import config, exceptions
 from nose.tools import nottest
 from urllib.parse import urljoin
-import cumtest
+import cu2test
 import os
 import requests
 import unittest
 import zipfile
 
 
-class TestMangasee(cumtest.CumTest):
+class TestMangasee(cu2test.Cu2Test):
     MANGASEE_URL = 'https://mangaseeonline.us/'
 
     def setUp(self):
         super().setUp()
         global mangasee
-        from cum.scrapers import mangasee
+        from cu2.scrapers import mangasee
 
     def tearDown(self):
         self.directory.cleanup()

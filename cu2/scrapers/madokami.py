@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from contextlib import closing
-from cum import config, exceptions
-from cum.scrapers.base import BaseChapter, BaseSeries
+from cu2 import config, exceptions
+from cu2.scrapers.base import BaseChapter, BaseSeries
 from urllib.parse import urljoin
 import re
 import requests

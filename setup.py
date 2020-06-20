@@ -43,7 +43,7 @@ def get_setup_version():
         version = process.communicate()[0].decode("utf-8").strip()
         return re.match(re_version, version).group(1)
     else:
-        from cum.version import __version__
+        from cu2.version import __version__
         return __version__
 
 
@@ -75,7 +75,7 @@ def write_version_file():
     the first line of the file so that the rest of the variables and functions
     can still be used normally.
     """
-    version_file_path = os.path.join(script_path, 'cum/version.py')
+    version_file_path = os.path.join(script_path, 'cu2/version.py')
     with open(version_file_path, 'r') as file:
         lines = file.readlines()
         lines[0] = "__version__ = '{}'\n".format(version)
@@ -93,10 +93,10 @@ if version:
     write_version_file()
 
 setup(
-    name='cum',
+    name='cu2',
     version=get_setup_version(),
     description='comic updater, mangafied',
-    url='https://github.com/Hamuko/cum',
+    url='https://github.com/matoro/cu2',
     author='Hamuko',
     author_email='hamuko@burakku.com',
     license='Apache2',
@@ -126,6 +126,6 @@ setup(
         'testing': ['codecov', 'cov-core', 'nose2', 'pycodestyle']
     },
     entry_points={
-        'console_scripts': ['cum=cum.cum:cli'],
+        'console_scripts': ['cu2=cu2.cu2:cli'],
     }
 )

@@ -1,39 +1,32 @@
-# cum
+# cu2
 
-[![Build Status](https://travis-ci.org/Hamuko/cum.svg?branch=master)](https://travis-ci.org/Hamuko/cum)
-[![codecov.io](https://img.shields.io/codecov/c/github/Hamuko/cum.svg?maxAge=86400)](https://codecov.io/github/Hamuko/cum?branch=master)
-[![PyPI](https://img.shields.io/pypi/v/cum.svg?maxAge=86400)](https://pypi.python.org/pypi/cum)
-[![AUR](https://img.shields.io/aur/version/cum.svg?maxAge=86400)](https://aur.archlinux.org/packages/cum/)
-
-comic updater, mangafied
+comic updater 2
 
 ## Description
 
-cum (comic updater, mangafied) is a tool designed for automated manga downloads from various online manga aggregate sites. It is inspired by some of the popular package managers used with Linux distributions and OS X. The file naming scheme is partially based Daiz's [Manga Naming Scheme](https://gist.github.com/Daiz/bb8424cfedd0f05b7386).
+cu2 (comic updater 2, forked from the unfortunately-intentionally-named [comic updater, mangafied](https://github.com/hamuko/cum)) is a tool designed for automated manga downloads from various online manga aggregate sites. It is inspired by some of the popular package managers used with Linux distributions and OS X. The file naming scheme is partially based Daiz's [Manga Naming Scheme](https://gist.github.com/Daiz/bb8424cfedd0f05b7386).
+
+Documentation updates for the fork are a work in progress.  Please, feel free to file PRs for any documentation that does not reflect the changes in this fork.
 
 ## Installation
 
-The easiest way to install the latest release of cum is by downloading and installing it from [Python Package Index](https://pypi.python.org/pypi/cum) with the command
+No official packaging at this time - installation from the master branch can be done like so:
 
-    pip install cum
+    pip install git+https://github.com/matoro/cu2
 
-If you want to get the latest and (possibly) the greatest, you can install the master branch version with
-
-    pip install git+https://github.com/Hamuko/cum
-
-Users of Arch Linux can install release versions from [the AUR](https://aur.archlinux.org/packages/cum/).
-
-Please note that cum currently requires **Python 3.3** or newer.
+Please note that cu2 currently requires **Python 3.3** or newer.
 
 ## Usage
 
-To print out a list of available commands, use `cum --help`. For help with a particular command, use `cum COMMAND --help`.
+To print out a list of available commands, use `cu2 --help`. For help with a particular command, use `cu2 COMMAND --help`.
 
 ### Configuration
 
-Configuration is stored at `~/.cum/config.json` (`%APPDATA%\cum\config.json` for Windows) and overwrites the following default values. cum will not write login information supplied by the user at run-time back to the config file, but will store session cookies if any exist. Configuration can get read with the command `cum config get [SETTING]` and set using `cum config set [SETTING] [VALUE]`.
+Configuration is stored at `~/.cu2/config.json` (`%APPDATA%\cu2\config.json` for Windows) and overwrites the following default values. cu2 will not write login information supplied by the user at run-time back to the config file, but will store session cookies if any exist. Configuration can get read with the command `cu2 config get [SETTING]` and set using `cu2 config set [SETTING] [VALUE]`.
 
 See the [Configuration](../../wiki/Configuration) wiki page for more details and available settings.
+
+Support for the XDG specification will be coming soon.
 
 ### Commands
 
@@ -65,25 +58,25 @@ update     Gather new chapters from followed series.
 
 ```bash
 # Update the database with possible new chapters for followed series.
-$ cum update
+$ cu2 update
 
 # List all new, non-ignored chapters.
-$ cum new
+$ cu2 new
 
 # Add a follow for a manga series.
-$ cum follow https://dynasty-scans.com/series/gakkou_gurashi
+$ cu2 follow https://dynasty-scans.com/series/gakkou_gurashi
 
 # Print out the chapter list for the added series.
-$ cum chapters gakkou-gurashi
+$ cu2 chapters gakkou-gurashi
 
 # Ignore the first three chapters for the added series.
-$ cum ignore gakkou-gurashi 2 3 1
+$ cu2 ignore gakkou-gurashi 2 3 1
 
 # Change the alias for the added series.
-$ cum edit gakkou-gurashi alias school-live
+$ cu2 edit gakkou-gurashi alias school-live
 
 # Download all new, non-ignored chapters for the added series using the new alias.
-$ cum download school-live
+$ cu2 download school-live
 ```
 
 ## Supported sites
@@ -101,8 +94,4 @@ See the [Supported sites](../../wiki/Supported-sites) wiki page for details.
 
 ## Contribution
 
-If you wish to contribute to cum, please consult the [Contribution Guide](CONTRIBUTING.md) first to make everything a bit easier.
-
-## Community
-
-There is an IRC channel for cum, `#cu` on `irc.rizon.net`, where cum development and issues are occasionally discussed.
+If you wish to contribute to cu2, please consult the [Contribution Guide](CONTRIBUTING.md) first to make everything a bit easier.

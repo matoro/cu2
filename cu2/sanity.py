@@ -59,10 +59,10 @@ class DatabaseSanity(object):
 
     def test_batoto_follows(self):
         """Test that there are no Batoto follows in the database as the scraper
-        has been removed in cum v0.9.
+        has been removed in cu2 v0.9.
         """
         global db
-        from cum import db
+        from cu2 import db
         domain = 'bato.to'
         condition = db.Series.url.ilike('%bato.to%')
         try:
@@ -129,7 +129,7 @@ class DatabaseSanity(object):
         Returns SanityError that can correct them to the new_doamin.
         """
         global db
-        from cum import db
+        from cu2 import db
 
         models = [db.Series, db.Chapter]
         for model in models:

@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-from cum import config, db, exceptions, output
+from cu2 import config, db, exceptions, output
 from mimetypes import guess_extension
 from re import match, sub
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
