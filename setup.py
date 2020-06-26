@@ -111,7 +111,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Topic :: Internet :: WWW/HTTP'
     ],
-    packages=find_packages(),
+    packages=find_packages(exclude = ['tests*']),
     data_files=[('', ['LICENSE']), ('tests', TEST_DATA_FILES)],
     install_requires=[
         'alembic',
