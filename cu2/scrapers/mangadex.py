@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from cu2 import config, exceptions, output
 from cu2.scrapers.base import BaseChapter, BaseSeries, download_pool
+from datetime import datetime
 from functools import partial
 from mimetypes import guess_type
 from urllib.parse import urljoin, urlparse
@@ -109,7 +110,12 @@ class MangadexChapter(BaseChapter):
         else:
             r = self.reader_get(1)
 
-        chapter_hash = self.json['hash']
+        try:
+            chapter_hash = self.json['hash']
+        except KeyError:
+            output.warning("{} {} is on delayed release: {}".format(self.alias, str(self.chapter),
+                datetime.utcfromtimestamp(self.json['timestamp']).strftime('%Y-%m-%d %H:%M:%S UTC')))
+            raise exceptions.ScrapingError
         pages = self.json['page_array']
         files = [None] * len(pages)
         # This can be a mirror server or data path. Example:

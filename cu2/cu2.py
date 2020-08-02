@@ -155,6 +155,8 @@ def download(aliases):
         except exceptions.LoginError as e:
             output.warning('Could not download {c.alias} {c.chapter}: {e}'
                            .format(c=chapter, e=e.message))
+        except exceptions.ScrapingError:
+            pass
 
 
 @cli.command()
