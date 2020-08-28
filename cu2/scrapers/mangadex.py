@@ -13,7 +13,6 @@ import requests
 import json
 from cu2.version import __version__
 
-
 class MangadexSeries(BaseSeries):
     url_re = re.compile(
         r'(?:https?://mangadex\.org)?/(?:manga|title)/([0-9]+)'
@@ -38,19 +37,22 @@ class MangadexSeries(BaseSeries):
         #            erros when making requests to /api/ urls quickly.
         #            It may still break when 4 calls are done at the same time
         sleep(randrange(0, 900) / 1000.0)
-        if r.status_code == 503 and self.spam_failures < 3:
+        if r.status_code in [ 500, 503 ] and self.spam_failures < 3:
             # sleep 10-17 seconds to wait out the spam protection
             # and make it less likely for all threads to hit at the same time
             sleep(randrange(10000, 17000) / 1000.0)
             self.spam_failures = self.spam_failures + 1
             return self._get_page(url)
         elif self.spam_failures >= 3:
-            print("Error: Mangadex server probably contacted too often\n")
-            print(r.text)
+            output.error("Error: Mangadex server probably contacted too often")
             raise exceptions.ScrapingError("Mangadex spam error")
 
         self.spam_failures = 0
-        self.json = json.loads(r.text)
+        try:
+            self.json = json.loads(r.text)
+        except json.decoder.JSONDecodeError:
+            output.error("Failed to decode response from Mangadex server")
+            raise exceptions.ScrapingError
 
     def get_chapters(self):
         result_chapters = []
