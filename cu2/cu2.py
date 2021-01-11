@@ -225,6 +225,7 @@ def follow(urls, directory, download, ignore):
         else:
             series.follow()
             chapters += db.Chapter.find_new(alias=series.alias)
+        del series
 
     if download:
         output.chapter('Downloading {} chapters'.format(len(chapters)))
@@ -234,6 +235,7 @@ def follow(urls, directory, download, ignore):
             except exceptions.LoginError as e:
                 output.warning('Could not download {c.alias} {c.chapter}: {e}'
                                .format(c=chapter, e=e.message))
+            del chapter
 
 
 @cli.command()
@@ -300,6 +302,8 @@ def get(input, directory):
                 output.warning('Invalid selection "{}"'.format(item))
             for chapter in chapters:
                 chapter_list.append(chapter.to_object())
+        if series:
+            del series
     for chapter in chapter_list:
         chapter.directory = directory
         try:
@@ -307,6 +311,7 @@ def get(input, directory):
         except exceptions.LoginError as e:
             output.warning('Could not download {c.alias} {c.chapter}: {e}'
                            .format(c=chapter, e=e.message))
+        del chapter
 
 
 @cli.command()
@@ -424,7 +429,7 @@ def update(fast):
     else:
         output.series('Updating {} series'.format(len(query)))
     for follow in query:
-        fut = pool.submit(utility.series_by_url, follow.url)
+        fut = pool.submit(utility.series_by_url, follow.url.replace("mangaseeonline.us", "mangasee123.com"))
         futures.append(fut)
         aliases[fut] = follow.alias
     with click.progressbar(length=len(futures), show_pos=True,

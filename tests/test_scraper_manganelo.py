@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from cu2 import config, exceptions
+from cu2 import config, exceptions, output
 from nose.tools import nottest
 from urllib.parse import urljoin
 from warnings import filterwarnings
@@ -27,6 +27,9 @@ class TestManganelo(cu2test.Cu2Test):
         soup = BeautifulSoup(r.text, config.get().html_parser)
         chapters = soup.find_all("a", class_="genres-item-chap")
         links = [x["href"] for x in chapters]
+        if len(links) < 5:
+            output.error('Unable to extract latest releases')
+            raise exceptions.ScrapingError
         return links[:5]
 
     @nottest
@@ -60,8 +63,8 @@ class TestManganelo(cu2test.Cu2Test):
             try:
                 chapter = manganelo.ManganeloChapter.from_url(release)
             except exceptions.ScrapingError as e:
-                print('scraping error for {} - {}'.format(release, e))
-                continue
+                print('Scraping error for {} - {}'.format(release, e))
+                raise exceptions.ScrapingError
             else:
                 chapter.get(use_db=False)
 

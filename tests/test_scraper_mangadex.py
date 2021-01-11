@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from cu2 import config, exceptions
+from cu2 import config, exceptions, output
 from urllib.parse import urljoin
 import cu2test
 import os
@@ -11,8 +11,7 @@ import zipfile
 
 def language_filter(a):
     try:
-        regex = re.compile(r'/images/flags/')
-        return a.find_parent('tr').find('img', src=regex)['title'] == 'English'
+        return a.find_parent('tr').find('span', title = "English")
     # ignore chapter links that do not state a language
     except TypeError:
         return None
@@ -28,13 +27,15 @@ class TestMangadex(cu2test.Cu2Test):
     def tearDown(self):
         self.directory.cleanup()
 
-
     def get_five_latest_releases(self):
         r = requests.get(self.MANGADEX_URL + 'updates')
         soup = BeautifulSoup(r.text, config.get().html_parser)
         chapters = soup.find_all('a', href=mangadex.MangadexChapter.url_re)
         chapters = [a for a in chapters if language_filter(a)]
         links = [urljoin(self.MANGADEX_URL, x.get('href')) for x in chapters]
+        if len(links) < 5:
+            output.error('Unable to extract latest releases')
+            raise exceptions.ScrapingError
         return links[:5]
 
     def series_information_tester(self, data):
@@ -60,8 +61,8 @@ class TestMangadex(cu2test.Cu2Test):
             try:
                 chapter = mangadex.MangadexChapter.from_url(release)
             except exceptions.ScrapingError as e:
-                print('scrapping error for {} - {}'.format(release, e))
-                continue
+                output.error('Scraping error for {} - {}'.format(release, e))
+                raise exceptions.ScrapingError
             else:
                 chapter.get(use_db=False)
 

@@ -47,7 +47,7 @@ class Series(Base):
     def __init__(self, series):
         self.name = series.name
         self.alias = series.alias
-        self.url = series.url
+        self.url = series.url.replace("mangaseeonline.us", "mangasee123.com")
         self.directory = series.directory
 
     @staticmethod
@@ -242,7 +242,7 @@ class Chapter(Base):
         if parse.netloc == 'www.yuri-ism.net':
             from cu2.scrapers.yuriism import YuriismChapter
             return YuriismChapter(**kwargs)
-        if parse.netloc == 'mangaseeonline.us':
+        if parse.netloc == 'mangasee123.com':
             from cu2.scrapers.mangasee import MangaseeChapter
             return MangaseeChapter(**kwargs)
         if parse.netloc in ('www.mangahere.cc', 'm.mangahere.cc'):

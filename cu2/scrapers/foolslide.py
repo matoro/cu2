@@ -44,7 +44,7 @@ class FoOlSlideSeries(BaseSeries, metaclass=ABCMeta):
         with the specified series URL is found.
         """
         while True:
-            response = requests.get(self.api_hook_list).json()
+            response = self.req_session.get(self.api_hook_list).json()
             if response.get('error', None) == 'Comics could not be found':
                 raise exceptions.ScrapingError()
             result = self._process_comic_list(response)
@@ -58,7 +58,7 @@ class FoOlSlideSeries(BaseSeries, metaclass=ABCMeta):
         """Queries the series details API and creates a chapter object for each
         chapter listed.
         """
-        response = requests.get(self.api_hook_details).json()
+        response = self.req_session.get(self.api_hook_details).json()
         chapters = []
         for chapter in response['chapters']:
             if int(chapter['chapter']['subchapter']) > 0:
@@ -108,13 +108,13 @@ class FoOlSlideChapter(BaseChapter, metaclass=ABCMeta):
         return urljoin(self.BASE_URL, path)
 
     def download(self):
-        response = requests.get(self.api_hook_details).json()
+        response = self.req_session.get(self.api_hook_details).json()
         pages = response['pages']
         files = [None] * len(pages)
         futures = []
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
-                r = requests.get(page['url'], stream=True)
+                r = self.req_session.get(page['url'], stream=True)
                 fut = download_pool.submit(self.page_download_task, i, r)
                 fut.add_done_callback(partial(self.page_download_finish,
                                               bar, files))

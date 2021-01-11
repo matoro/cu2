@@ -15,7 +15,7 @@ class ManganeloSeries(BaseSeries):
     def __init__(self, url, **kwargs):
         super().__init__(url, **kwargs)
         filterwarnings(action = "ignore", message = "unclosed", category = ResourceWarning)
-        spage = requests.get(url)
+        spage = self.req_session.get(url)
         if spage.status_code == 404:
             raise exceptions.ScrapingError
         self.soup = BeautifulSoup(spage.text, config.get().html_parser)
@@ -65,7 +65,7 @@ class ManganeloChapter(BaseChapter):
     # thus this method override
     def available(self):
         if not getattr(self, "cpage", None):
-            self.cpage = requests.get(self.url)
+            self.cpage = self.req_session.get(self.url)
         if not getattr(self, "soup", None):
             self.soup = BeautifulSoup(self.cpage.text,
                                       config.get().html_parser)
@@ -73,7 +73,7 @@ class ManganeloChapter(BaseChapter):
 
     def download(self):
         if not getattr(self, "cpage", None):
-            self.cpage = requests.get(self.url)
+            self.cpage = self.req_session.get(self.url)
         if not getattr(self, "soup", None):
             self.soup = BeautifulSoup(self.cpage.text,
                                       config.get().html_parser)
@@ -85,16 +85,19 @@ class ManganeloChapter(BaseChapter):
 
         futures = []
         files = [None] * len(pages)
-        req_session = requests.Session()
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
                 retries = 0
-                while retries < 10:
+                while retries < 5:
                     try:
-                        r = req_session.get(page, stream=True)
-                        if r.status_code != 200:
-                            output.warning('Failed to fetch page with status {}, retrying #{}'
-                                            .format(str(r.status_code), str(retries)))
+                        r = self.req_session.get(page, stream=True)
+                        if r.status_code == 403:
+                            output.error('Failed to fetch page {} with status {}'
+                                            .format(str(i), str(r.status_code)))
+                            raise exceptions.ScrapingError
+                        elif r.status_code != 200:
+                            output.warning('Failed to fetch page {} with status {}, retrying #{}'
+                                            .format(str(i), str(r.status_code), str(retries)))
                             retries += 1
                         else:
                             break
@@ -103,19 +106,18 @@ class ManganeloChapter(BaseChapter):
                 if r.status_code != 200:
                     output.error('Failed to fetch page with status {}, giving up'
                                     .format(str(r.status_code)))
-                    raise ValueError
+                    raise exceptions.ScrapingError
                 fut = download_pool.submit(self.page_download_task, i, r)
                 fut.add_done_callback(partial(self.page_download_finish,
                                               bar, files))
                 futures.append(fut)
             concurrent.futures.wait(futures)
             self.create_zip(files)
-            req_session.close()
 
     def from_url(url):
         cpage = requests.get(url)
         soup = BeautifulSoup(cpage.text, config.get().html_parser)
-        iname = re.match("https?://manganelo\.com/chapter/(.+)/chapter_[0-9\.]+",
+        iname = re.match(r"https?://manganelo\.com/chapter/(.+)/chapter_[0-9\.]+",
                             url).groups()[0]
         series = ManganeloSeries("https://manganelo.com/manga/" + iname)
         for chapter in series.chapters:

@@ -19,7 +19,7 @@ class DynastyScansSeries(BaseSeries):
         if url.endswith('/'):
             url = url[:-1]
         jurl = url + '.json'
-        self.json = requests.get(jurl).json()
+        self.json = self.req_session.get(jurl).json()
         self.chapters = self.get_chapters()
 
     def get_chapters(self):
@@ -57,14 +57,14 @@ class DynastyScansChapter(BaseChapter):
             self.groups = self.get_groups()
 
     def download(self):
-        data = requests.get(self.url + '.json').json()
+        data = self.req_session.get(self.url + '.json').json()
         pages = [urljoin('https://dynasty-scans.com',
                  u['url']) for u in data['pages']]
         files = [None] * len(pages)
         futures = []
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
-                r = requests.get(urljoin(self.url, page), stream=True)
+                r = self.req_session.get(urljoin(self.url, page), stream=True)
                 fut = download_pool.submit(self.page_download_task, i, r)
                 fut.add_done_callback(partial(self.page_download_finish,
                                               bar, files))
@@ -76,7 +76,7 @@ class DynastyScansChapter(BaseChapter):
         url = url.replace('http://', 'https://')
         if url.endswith('/'):
             url = url[:-1]
-        j = requests.get(url + '.json').json()
+        j = self.req_session.get(url + '.json').json()
         author_link = None
         for t in j['tags']:
             if t['type'] == 'Series':
@@ -99,7 +99,7 @@ class DynastyScansChapter(BaseChapter):
         return DynastyScansChapter(name=name, chapter='0', url=url)
 
     def get_groups(self):
-        data = requests.get(self.url + '.json').json()
+        data = self.req_session.get(self.url + '.json').json()
         groups = []
         for t in data['tags']:
             if t['type'] == 'Scanlator':

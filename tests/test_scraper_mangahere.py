@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from cu2 import config, exceptions
+from cu2 import config, exceptions, output
 from nose.tools import nottest
 from urllib.parse import urljoin
 import cu2test
@@ -58,8 +58,8 @@ class TestMangahere(cu2test.Cu2Test):
             try:
                 chapter = mangahere.MangahereChapter.from_url(release)
             except exceptions.ScrapingError as e:
-                print('scraping error for {} - {}'.format(release, e))
-                continue
+                output.error('Scraping error for {} - {}'.format(release, e))
+                raise exceptions.ScrapingError
             else:
                 chapter.get(use_db=False)
 

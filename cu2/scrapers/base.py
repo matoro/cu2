@@ -22,6 +22,10 @@ class BaseSeries(metaclass=ABCMeta):
     def __init__(self, url, **kwargs):
         self.url = url
         self.directory = kwargs.get('directory', None)
+        self.req_session = requests.Session()
+
+    def __del__(self):
+        self.req_session.close()
 
     @property
     def alias(self):
@@ -94,6 +98,10 @@ class BaseChapter(metaclass=ABCMeta):
         self.url = kwargs.get('url')
         self.groups = kwargs.get('groups', None)
         self.directory = kwargs.get('directory', None)
+        self.req_session = requests.Session()
+
+    def __del__(self):
+        self.req_session.close()
 
     def _strip_unwanted_characters(self, path):
         """Strips unwanted characters from paths or filenames."""
@@ -123,7 +131,7 @@ class BaseChapter(metaclass=ABCMeta):
         Some sites might not return HTTP 404 on missing chapters and require
         custom version of this method to work.
         """
-        r = requests.head(self.url)
+        r = self.req_session.head(self.url)
         if r.status_code == 404:
             return False
         else:
@@ -342,7 +350,7 @@ class BaseChapter(metaclass=ABCMeta):
                 if retries <= 0:
                     output.error("Connection killed on page {}, no retries remaining - aborting chapter".format(str(page_num)))
                     raise exceptions.ScrapingError
-                r = requests.get(page_url, stream = True)
+                r = self.req_session.get(page_url, stream = True)
         f.flush()
         f.close()
         r.close()

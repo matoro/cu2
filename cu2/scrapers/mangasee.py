@@ -7,46 +7,77 @@ import json
 import re
 import requests
 
+# Python translation of vm.ChapterDisplay
+# see notes/mangasee.js
+def _mangasee_decode_chap_num(chap_code):
+    t = int(chap_code[1:-1])
+    n = chap_code[len(chap_code) - 1]
+    return str(t) if "0" == n else str(t) + "." + n
+
+# Python translation of vm.ChapterURLEncode
+# see notes/mangasee.js
+def _mangasee_decode_chap_url(chap_code):
+    page_one = "-page-1"
+    index = "";
+    t = chap_code[0:1]
+    if t != "1":
+        index = "-index-" + t
+    n = chap_code[1:-1]
+    m = ""
+    a = chap_code[len(chap_code) - 1]
+    if a != "0":
+        m = "." + a
+    return "-chapter-" + n + m + index + page_one + ".html"
 
 class MangaseeSeries(BaseSeries):
-    url_re = re.compile(r'https?://mangaseeonline\.us/manga/.+')
-    multi_season_regex = re.compile((r"(https?://mangaseeonline\.us)"
-                                     r"?/read-online/"
-                                     r".+-chapter-[0-9\.]+-index-"
-                                     r"([0-9]+)-page-[0-9]+\.html"))
+    url_re = re.compile(r'https?://mangasee123\.com/manga/.+')
 
     def __init__(self, url, **kwargs):
         super().__init__(url, **kwargs)
-        spage = requests.get(url)
+        spage = self.req_session.get(url)
         if spage.status_code == 404:
             raise exceptions.ScrapingError
         self.soup = BeautifulSoup(spage.text, config.get().html_parser)
         self.chapters = self.get_chapters()
 
-    def _get_chapnum_multiseason_series(self, url, chap_num):
-        if not re.match(self.multi_season_regex, url):
-            # chapter is from season 1
-            return "01." + chap_num.zfill(3)
-        else:
-            # chapter is from season >1
-            season = re.match(self.multi_season_regex, url).groups()[1]
-            return season.zfill(2) + "." + chap_num.zfill(3)
-
     def get_chapters(self):
+        # the new React-based site uses "chapter codes" which encode both
+        # the chapter number, the URL, and season (where applicable)
+        # the original JS implementations can be found at notes/mangasee.js
+
+        # attempt to extract the index name first, as it is guaranteed to fail
+        # for bad series URLs
         try:
-            rows = self.soup.find_all("a", class_="list-group-item")
+            index_name = re.search(r"vm\.IndexName = \"(.+?)\";",
+                                    str(self.soup.find_all("script")[-1].contents)).groups()[0]
         except AttributeError:
-            raise exceptions.ScrapingError()
+            output.error('Unable to extract series index name')
+            raise exceptions.ScrapingError
+        chap_codes = re.findall(r"\"Chapter\":\"([0-9]+?)\"",
+                                str(self.soup.find_all("script")[-1].contents))
+        chap_types = re.findall(r"\"Type\":\"(.+?)\"",
+                                str(self.soup.find_all("script")[-1].contents))
+        chap_dates = re.findall(r"\"Date\":\"(.+?)\"",
+                                str(self.soup.find_all("script")[-1].contents))
         chapters = []
-        for i, row in enumerate(rows):
-            chap_num = re.match(r"Read .+ Chapter ([0-9\.]+) For Free Online",
-                                row["title"]).groups()[0]
-            if not hasattr(self, "is_multi_season"):
-                if re.match(self.multi_season_regex, row["href"]):
-                    self.is_multi_season = True
-            chap_url = "https://mangaseeonline.us" + row["href"]
-            chap_name = row.find("span").text
-            chap_date = row.find("time").text
+        season_names = []
+        for i, chap_code in enumerate(chap_codes):
+            chap_url = "https://mangasee123.com/read-online/" + index_name + \
+                       _mangasee_decode_chap_url(chap_code)
+            # unfortunately complex heuristic for identifying if a work is multi-season
+            # or not.  originally this just check if it had some chapter prefix other
+            # than "Chapter", but it seems there are some series that were using
+            # a special name during the old site but the site admins just got lazy
+            # and started using "Chapter" for everything on the new site.  so instead,
+            # check if there is at least one digit in the chapter type before
+            # declaring that type a "season".
+            # https://stackoverflow.com/a/11232474/6214870
+            if any(char.isdigit() for char in chap_types[i]):
+                if chap_types[i] not in season_names:
+                    season_names.append(chap_types[i])
+            chap_num = _mangasee_decode_chap_num(chap_code)
+            chap_name = chap_types[i] + " " + chap_num
+            chap_date = chap_dates[i]
             result = MangaseeChapter(name=self.name,
                                      alias=self.alias,
                                      chapter=chap_num,
@@ -55,22 +86,27 @@ class MangaseeSeries(BaseSeries):
                                      groups=[],
                                      upload_date=chap_date)
             chapters.append(result)
+
         # the chapters in the first season of a multi-season title
         # are indistinguishable from a non-multi-season title.  thus
         # we must retroactively reanalyze all chapters and adjust
         # chapter numbers if *any* are multi-season
-        if hasattr(self, "is_multi_season"):
-            for chapter in chapters:
-                chapter.chapter = self.\
-                    _get_chapnum_multiseason_series(chapter.url,
-                                                    chapter.chapter)
+        if len(season_names) > 0:
+            # chapters are sorted in reverse chronological order
+            working_season = 0
+            for i, chapter in enumerate(chapters):
+                if chap_types[i] != season_names[working_season]:
+                    working_season += 1
+
+                # working_season will be zero-indexed, but seasons should start from 1
+                chapter.chapter = str(len(season_names) - working_season).zfill(2) + "." + chapter.chapter.zfill(3)
 
         return chapters
 
     @property
     def name(self):
         try:
-            return re.match(r"Read (.+) Man[a-z]+ For Free  \| MangaSee",
+            return re.match(r"(.+) \| MangaSee",
                             self.soup.find("title").text).groups()[0]
         except AttributeError:
             raise exceptions.ScrapingError
@@ -84,38 +120,70 @@ class MangaseeChapter(BaseChapter):
 
     def download(self):
         if not getattr(self, "cpage", None):
-            self.cpage = requests.get(self.url)
+            self.cpage = self.req_session.get(self.url)
         if not getattr(self, "soup", None):
             self.soup = BeautifulSoup(self.cpage.text,
                                       config.get().html_parser)
 
-        for script in self.soup.find_all("script"):
-            if len(script.contents) and re.match("\n\tChapterArr=.+", script.contents[0]):
-                image_list = script.contents[0]
-                continue
+        current_chap_code = re.search(r"vm.CurChapter = {\"Chapter\":\"([0-9]+)\"", \
+                            str(self.soup.find_all("script")[-1].contents)).groups()[0]
+        chap_codes = re.findall(r"\"Chapter\":\"([0-9]+?)\"",
+                                str(self.soup.find_all("script")[-1].contents))
+        chap_pages = re.findall(r"\"Page\":\"([0-9]+?)\"",
+                                str(self.soup.find_all("script")[-1].contents))
 
-        image_list = re.sub("\n\tChapterArr=", "", image_list)
-        image_list = re.sub(";\n\t?", "", image_list)
-        image_list = re.sub("PageArr=", ",", image_list)
-        image_list = "[" + image_list + "]"
-        image_list = json.loads(image_list)[1]
+        # find number of pages in this chapter
+        num_pages = 0
+        for i, chap in enumerate(chap_codes):
+            if current_chap_code == chap:
+                num_pages = int(chap_pages[i])
+                break
+
+        # we weren't able to identify the number of pages
+        if num_pages <= 0:
+            output.error('Failed to extract pages for chapter code: {}'.format(current_chap_code))
+            raise exceptions.ScrapingError
+
+        # we need the pre-decimal portion of the chapter number to be padded to 4 digits
+        current_chap_num = _mangasee_decode_chap_num(current_chap_code)
+        if "." in current_chap_num:
+            current_chap_num = current_chap_num.zfill(6)
+        else:
+            current_chap_num = current_chap_num.zfill(4)
+
+        # three more pieces of data we need to extract.  first is the "directory" attribute
+        # which seems to be used for multi-season works.  it is an empty string for
+        # non-multi-season works.
+        directory = re.search(r"vm.CurChapter.+?\"Directory\":\"(.*?)\"", \
+                              str(self.soup.find_all("script")[-1].contents)).groups()[0]
+        if directory == "":
+            directory = "/"
+        else:
+            directory = "/" + directory + "/"
+
+        # second is the domain name the images are hosted on.  they have been moved off of
+        # blogspot and now use cycle round-robin to servers behind cloudflare.
+        domain = re.search(r"vm.CurPathName = \"(.+?)\";", \
+                           str(self.soup.find_all("script")[-1].contents)).groups()[0]
+
+        # third is the index name.
+        index_name = re.search(r"vm\.IndexName = \"(.+?)\";",
+                                str(self.soup.find_all("script")[-1].contents)).groups()[0]
+
+        # now we're finally read to start assembling the image urls.
         pages = []
-        for image in image_list:
-            if image != "CurPage":
-                if re.match(".+blogspot.+", image_list[image]):
-                    image_list[image] = image_list[image].\
-                                        replace("http://", "https://")
-                pages.append(image_list[image])
+        for i in range(0, num_pages):
+            pages.append("https://" + domain + "/manga/" + index_name + directory + \
+                         current_chap_num + "-" + str(i + 1).zfill(3) + ".png")
 
         futures = []
         files = [None] * len(pages)
-        req_session = requests.Session()
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
                 retries = 0
-                while retries < 10:
+                while retries < 5:
                     try:
-                        r = req_session.get(page, stream=True)
+                        r = self.req_session.get(page, stream=True)
                         if r.status_code != 200:
                             output.warning('Failed to fetch page with status {}, retrying #{}'
                                             .format(str(r.status_code), str(retries)))
@@ -134,15 +202,24 @@ class MangaseeChapter(BaseChapter):
                 futures.append(fut)
             concurrent.futures.wait(futures)
             self.create_zip(files)
-        req_session.close()
 
     def from_url(url):
         cpage = requests.get(url)
         soup = BeautifulSoup(cpage.text, config.get().html_parser)
-        # chap_num = soup.find("span", class_="CurChapter").text
-        iname = soup.find("a", class_="list-link")["href"]
-        series = MangaseeSeries("https://mangaseeonline.us" + iname)
+        iname = soup.find("a", class_="btn btn-sm btn-outline-secondary")["href"]
+        series = MangaseeSeries("https://mangasee123.com" + iname)
         for chapter in series.chapters:
             if chapter.url == url:
                 return chapter
-        return None
+        raise exceptions.ScrapingError
+
+    # new site no longer returns 404 on bad chapter
+    def available(self):
+        if not getattr(self, "cpage", None):
+            self.cpage = self.req_session.get(self.url)
+        if not getattr(self, "soup", None):
+            self.soup = BeautifulSoup(self.cpage.text,
+                                      config.get().html_parser)
+        if self.soup.find("title").text == "404 Page Not Found":
+            return False
+        return True

@@ -32,7 +32,7 @@ class MangahereSeries(BaseSeries):
         super().__init__(url, **kwargs)
         # convert desktop link to mobile
         # bypasses adult content warning js
-        spage = requests.get(url.replace("m.", "www."), cookies = { "isAdult": "1" })
+        spage = self.req_session.get(url.replace("m.", "www."), cookies = { "isAdult": "1" })
         if spage.status_code == 404:
             raise exceptions.ScrapingError
         self.soup = BeautifulSoup(spage.text, config.get().html_parser)
@@ -105,7 +105,7 @@ class MangahereChapter(BaseChapter):
         chrome_headers["accept"] = "*/*"
         chrome_headers["referer"] = self.url.replace("m.", "www.")
         chrome_headers["x-requested-with"] = "XMLHttpRequest"
-        data = self.session.get(data_url, headers = chrome_headers)
+        data = self.req_session.get(data_url, headers = chrome_headers)
         if data.text == "":
             raise cu2.exceptions.ScrapingError
         try:
@@ -124,24 +124,14 @@ class MangahereChapter(BaseChapter):
         return pages
 
     def download(self):
-
-        self.session = requests.Session()
-
         if not getattr(self, "cpage", None):
-            self.cpage = self.session.get(self.url.replace("m.", "www."), headers = chrome_headers)
+            self.cpage = self.req_session.get(self.url.replace("m.", "www."), headers = chrome_headers)
             if self.cpage.status_code == 404:
                 raise exceptions.ScrapingError
 
         if not getattr(self, "soup", None):
             self.soup = BeautifulSoup(self.cpage.text,
                                       config.get().html_parser)
-
-        # broken 2020/04/04
-        # image_list = self.soup.find("div", class_="mangaread-img")\
-            # .find_all("img")
-        # pages = []
-        # for image in image_list:
-            # pages.append(image["data-original"].replace("http://", "https://"))
 
         pages = []
         (mid, cid) = (None, None)
@@ -180,7 +170,7 @@ class MangahereChapter(BaseChapter):
                 retries = 0
                 while retries < 10:
                     try:
-                        r = self.session.get(page, stream=True)
+                        r = self.req_session.get(page, stream=True)
                         break
                     except requests.exceptions.ConnectionError:
                         retries += 1
@@ -199,11 +189,9 @@ class MangahereChapter(BaseChapter):
                     try:
                         del files[i]
                     except IndexError:
-                        self.session.close()
                         raise exceptions.ScrapingError
             concurrent.futures.wait(futures)
             self.create_zip(files)
-        self.session.close()
 
     def from_url(url):
         chap_num = re.match((r"https?://(?:(?:www|m)\.)?mangahere\.cc/(?:roll_)?"
@@ -230,5 +218,5 @@ class MangahereChapter(BaseChapter):
 
     def available(self):
         if not getattr(self, "cpage", None):
-            self.cpage = requests.get(self.url.replace("m.", "www."))
+            self.cpage = self.req_session.get(self.url.replace("m.", "www."))
         return self.cpage.status_code == 200
