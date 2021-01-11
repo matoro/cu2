@@ -92,7 +92,7 @@ class MangadexChapter(BaseChapter):
     def _reader_get(url, page_index):
         chapter_id = re.search(MangadexChapter.url_re, url)
         api_url = "https://mangadex.org/api/chapter/" + chapter_id.group(1)
-        return self.req_session.get(api_url, headers=MangadexSeries.headers)
+        return requests.get(api_url, headers=MangadexSeries.headers)
 
     def available(self):
         self.r = self.reader_get(1)

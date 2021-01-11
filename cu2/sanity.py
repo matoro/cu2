@@ -55,6 +55,7 @@ class DatabaseSanity(object):
         # TODO: Remove in the future.
         self.test_old_domain('manga.madokami.com', 'manga.madokami.al')
         self.test_old_domain('mangadex.com', 'mangadex.org')
+        self.test_old_domain('mangaseeonline.us', 'mangasee123.com')
         self.test_batoto_follows()
 
     def test_batoto_follows(self):

@@ -7,6 +7,8 @@ import json
 import re
 import requests
 
+PAGE_ONE = "-page-1"
+
 # Python translation of vm.ChapterDisplay
 # see notes/mangasee.js
 def _mangasee_decode_chap_num(chap_code):
@@ -17,17 +19,27 @@ def _mangasee_decode_chap_num(chap_code):
 # Python translation of vm.ChapterURLEncode
 # see notes/mangasee.js
 def _mangasee_decode_chap_url(chap_code):
-    page_one = "-page-1"
     index = "";
     t = chap_code[0:1]
     if t != "1":
         index = "-index-" + t
-    n = chap_code[1:-1]
+    n = int(chap_code[1:-1])
     m = ""
     a = chap_code[len(chap_code) - 1]
     if a != "0":
         m = "." + a
-    return "-chapter-" + n + m + index + page_one + ".html"
+    return "-chapter-" + str(n) + m + index + PAGE_ONE + ".html"
+
+# chapter URLs may have the chapter number zero-padded or not;
+# they render the same with no redirects.  thus we need a
+# more complicated comparison test to see if two chapter URLs
+# are equal
+def _mangasee_chapters_are_equal(one, two):
+    one_split = one[:-12].split("-")
+    two_split = two[:-12].split("-")
+    if "index" not in one and "index" not in two:
+        return float(one_split[-1]) == float(two_split[-1])
+    return int(one_split[-1]) == int(two_split[-1]) and float(one_split[-3]) == float(two_split[-3])
 
 class MangaseeSeries(BaseSeries):
     url_re = re.compile(r'https?://mangasee123\.com/manga/.+')
@@ -95,8 +107,14 @@ class MangaseeSeries(BaseSeries):
             # chapters are sorted in reverse chronological order
             working_season = 0
             for i, chapter in enumerate(chapters):
-                if chap_types[i] != season_names[working_season]:
-                    working_season += 1
+                try:
+                    if chap_types[i] != season_names[working_season]:
+                        working_season += 1
+                except IndexError:
+                    # heuristic for season identification failed
+                    # this is a TODO.  sample title: Kiba no Tabishounin: The Arms Peddler
+                    output.error('Unable to identify season delineation: {}'.format(self.alias))
+                    raise exceptions.ScrapingError
 
                 # working_season will be zero-indexed, but seasons should start from 1
                 chapter.chapter = str(len(season_names) - working_season).zfill(2) + "." + chapter.chapter.zfill(3)
@@ -209,7 +227,7 @@ class MangaseeChapter(BaseChapter):
         iname = soup.find("a", class_="btn btn-sm btn-outline-secondary")["href"]
         series = MangaseeSeries("https://mangasee123.com" + iname)
         for chapter in series.chapters:
-            if chapter.url == url:
+            if _mangasee_chapters_are_equal(chapter.url, url):
                 return chapter
         raise exceptions.ScrapingError
 
