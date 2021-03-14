@@ -181,7 +181,7 @@ class MangaseeChapter(BaseChapter):
 
         # second is the domain name the images are hosted on.  they have been moved off of
         # blogspot and now use cycle round-robin to servers behind cloudflare.
-        domain = re.search(r"vm.CurPathName = \"(.+?)\";", \
+        domain = re.search(r"vm.CurPathNamez = \"(.+?)\";", \
                            str(self.soup.find_all("script")[-1].contents)).groups()[0]
 
         # third is the index name.
