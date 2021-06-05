@@ -25,6 +25,8 @@ class ManganeloSeries(BaseSeries):
         self.chapters = self.get_chapters()
 
     def get_chapters(self):
+        output.error(self.alias + ": MangaNelo no longer supported")
+        raise exceptions.ScrapingError()
         try:
             rows = self.soup.find_all("li", class_="a-h")
         except AttributeError:
@@ -49,7 +51,7 @@ class ManganeloSeries(BaseSeries):
     @property
     def name(self):
         try:
-            return re.match(r"(.+) Manga Online Free - Manganelo",
+            return re.match(r"(.+) Manga Online Free - Manga.+",
                             self.soup.find("title").text).groups()[0]
         except AttributeError:
             raise exceptions.ScrapingError
