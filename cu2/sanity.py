@@ -3,8 +3,8 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.declarative.clsregistry import _ModuleMarker
 from sqlalchemy.orm import RelationshipProperty
+from sqlalchemy.orm.clsregistry import _ModuleMarker
 from sqlalchemy.sql import sqltypes
 
 
@@ -42,8 +42,8 @@ class DatabaseSanity(object):
         Models with classes inherited from _ModuleMarker class are skipped as
         they are not actual models.
         """
-        for name, class_ in self.base._decl_class_registry.items():
-            if isinstance(class_, _ModuleMarker):
+        for name, class_ in self.base.registry._class_registry.data.items():
+            if isinstance(class_(), _ModuleMarker):
                 continue
             yield (name, class_)
 
@@ -85,8 +85,8 @@ class DatabaseSanity(object):
         # Search for correct class from models for the mapper.
         mapper = None
         for name, class_ in self.model_tables:
-            if class_.__tablename__ == table:
-                mapper = inspect(class_)
+            if class_().__tablename__ == table:
+                mapper = inspect(class_())
                 break
         if not mapper:
             return
@@ -159,7 +159,7 @@ class DatabaseSanity(object):
         table is missing, a MissingTable object is added to the error list.
         """
         for name, class_ in self.model_tables:
-            table = class_.__tablename__
+            table = class_().__tablename__
             if table not in self.database_tables:
                 self.errors.append(MissingTable(table, parent=self))
 
