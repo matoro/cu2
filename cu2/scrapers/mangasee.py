@@ -61,16 +61,16 @@ class MangaseeSeries(BaseSeries):
         # for bad series URLs
         try:
             index_name = re.search(r"vm\.IndexName = \"(.+?)\";",
-                                    str(self.soup.find_all("script")[-1].contents)).groups()[0]
+                                    str(self.soup.find_all("script")[-2].contents)).groups()[0]
         except AttributeError:
-            output.error('Unable to extract series index name')
+            output.error(self.alias + ': Unable to extract series index name')
             raise exceptions.ScrapingError
         chap_codes = re.findall(r"\"Chapter\":\"([0-9]+?)\"",
-                                str(self.soup.find_all("script")[-1].contents))
+                                str(self.soup.find_all("script")[-2].contents))
         chap_types = re.findall(r"\"Type\":\"(.+?)\"",
-                                str(self.soup.find_all("script")[-1].contents))
+                                str(self.soup.find_all("script")[-2].contents))
         chap_dates = re.findall(r"\"Date\":\"(.+?)\"",
-                                str(self.soup.find_all("script")[-1].contents))
+                                str(self.soup.find_all("script")[-2].contents))
         chapters = []
         season_names = []
         for i, chap_code in enumerate(chap_codes):
@@ -144,11 +144,11 @@ class MangaseeChapter(BaseChapter):
                                       config.get().html_parser)
 
         current_chap_code = re.search(r"vm.CurChapter = {\"Chapter\":\"([0-9]+)\"", \
-                            str(self.soup.find_all("script")[-1].contents)).groups()[0]
+                            str(self.soup.find_all("script")[-2].contents)).groups()[0]
         chap_codes = re.findall(r"\"Chapter\":\"([0-9]+?)\"",
-                                str(self.soup.find_all("script")[-1].contents))
+                                str(self.soup.find_all("script")[-2].contents))
         chap_pages = re.findall(r"\"Page\":\"([0-9]+?)\"",
-                                str(self.soup.find_all("script")[-1].contents))
+                                str(self.soup.find_all("script")[-2].contents))
 
         # find number of pages in this chapter
         num_pages = 0
@@ -173,7 +173,7 @@ class MangaseeChapter(BaseChapter):
         # which seems to be used for multi-season works.  it is an empty string for
         # non-multi-season works.
         directory = re.search(r"vm.CurChapter.+?\"Directory\":\"(.*?)\"", \
-                              str(self.soup.find_all("script")[-1].contents)).groups()[0]
+                              str(self.soup.find_all("script")[-2].contents)).groups()[0]
         if directory == "":
             directory = "/"
         else:
@@ -181,12 +181,12 @@ class MangaseeChapter(BaseChapter):
 
         # second is the domain name the images are hosted on.  they have been moved off of
         # blogspot and now use cycle round-robin to servers behind cloudflare.
-        domain = re.search(r"vm.CurPathNamez = \"(.+?)\";", \
-                           str(self.soup.find_all("script")[-1].contents)).groups()[0]
+        domain = re.search(r"vm.CurPathName = \"(.+?)\";", \
+                           str(self.soup.find_all("script")[-2].contents)).groups()[0]
 
         # third is the index name.
         index_name = re.search(r"vm\.IndexName = \"(.+?)\";",
-                                str(self.soup.find_all("script")[-1].contents)).groups()[0]
+                                str(self.soup.find_all("script")[-2].contents)).groups()[0]
 
         # now we're finally read to start assembling the image urls.
         pages = []
