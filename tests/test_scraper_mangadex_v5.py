@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from cu2 import config, exceptions, output
 from urllib.parse import urljoin
-import cu2test
+import tests.cu2test as cu2test
 import os
 import re
 import requests
@@ -9,37 +9,25 @@ import tempfile
 import unittest
 import zipfile
 
-def language_filter(a):
-    try:
-        return a.find_parent('tr').find('span', title = "English")
-    # ignore chapter links that do not state a language
-    except TypeError:
-        return None
-
-class TestMangadex(cu2test.Cu2Test):
+class TestMangadexV5(cu2test.Cu2Test):
     MANGADEX_URL = 'https://mangadex.org/'
+    MANGADEX_API_URL = "https://api.mangadex.org"
 
     def setUp(self):
         super().setUp()
-        global mangadex
-        from cu2.scrapers import mangadex
+        global mangadex_v5
+        from cu2.scrapers import mangadex_v5
 
     def tearDown(self):
         self.directory.cleanup()
 
     def get_five_latest_releases(self):
-        r = requests.get(self.MANGADEX_URL + 'updates')
-        soup = BeautifulSoup(r.text, config.get().html_parser)
-        chapters = soup.find_all('a', href=mangadex.MangadexChapter.url_re)
-        chapters = [a for a in chapters if language_filter(a)]
-        links = [urljoin(self.MANGADEX_URL, x.get('href')) for x in chapters]
-        if len(links) < 5:
-            output.error('Unable to extract latest releases')
-            raise exceptions.ScrapingError
-        return links[:5]
+        return [ TestMangadexV5.MANGADEX_API_URL + "/chapter/" + x["data"]["id"] 
+            for x in mangadex_v5._decode_json(mangadex_v5._make_api_request(
+            "/chapter?order[publishAt]=desc&translatedLanguage[]=en&limit=5").text)["results"] ]
 
     def series_information_tester(self, data):
-        series = mangadex.MangadexSeries(data['url'])
+        series = mangadex_v5.MangadexV5Series(data['url'])
         self.assertEqual(series.name, data['name'])
         self.assertEqual(series.alias, data['alias'])
         self.assertEqual(series.url, data['url'])
@@ -59,7 +47,7 @@ class TestMangadex(cu2test.Cu2Test):
         latest_releases = self.get_five_latest_releases()
         for release in latest_releases:
             try:
-                chapter = mangadex.MangadexChapter.from_url(release)
+                chapter = mangadex_v5.MangadexV5Chapter.from_url(release)
             except exceptions.ScrapingError as e:
                 output.error('Scraping error for {} - {}'.format(release, e))
                 raise exceptions.ScrapingError
@@ -68,7 +56,7 @@ class TestMangadex(cu2test.Cu2Test):
 
     def test_chapter_filename_decimal(self):
         URL = 'https://mangadex.org/chapter/24779'
-        chapter = mangadex.MangadexChapter.from_url(URL)
+        chapter = mangadex_v5.MangadexV5Chapter.from_url(URL)
         path = os.path.join(
             self.directory.name, 'Citrus',
             'Citrus - c020 x9 [Chaosteam].zip'
@@ -79,7 +67,7 @@ class TestMangadex(cu2test.Cu2Test):
     def test_chapter_filename_version2(self):
         # 1v2 style version numbers seem to be omitted on the current site
         URL = 'https://mangadex.org/chapter/12361'
-        chapter = mangadex.MangadexChapter.from_url(URL)
+        chapter = mangadex_v5.MangadexV5Chapter.from_url(URL)
         path = os.path.join(
             self.directory.name, 'Urara Meirochou',
             'Urara Meirochou - c001 [Kyakka].zip'
@@ -89,7 +77,7 @@ class TestMangadex(cu2test.Cu2Test):
 
     def test_chapter_information_ramen_daisuki_koizumi_san(self):
         URL = 'https://mangadex.org/chapter/26441'
-        chapter = mangadex.MangadexChapter.from_url(URL)
+        chapter = mangadex_v5.MangadexV5Chapter.from_url(URL)
         self.assertEqual(chapter.alias, 'ramen-daisuki-koizumi-san')
         self.assertTrue(chapter.available())
         self.assertEqual(chapter.chapter, '18')
@@ -108,7 +96,7 @@ class TestMangadex(cu2test.Cu2Test):
 
     def test_chapter_information_hidamari_sketch(self):
         URL = 'https://mangadex.org/chapter/9833'
-        chapter = mangadex.MangadexChapter.from_url(URL)
+        chapter = mangadex_v5.MangadexV5Chapter.from_url(URL)
         self.assertEqual(chapter.alias, 'hidamari-sketch')
         self.assertEqual(chapter.chapter, '0')
         self.assertEqual(chapter.groups, ['Highlanders'])
@@ -128,7 +116,7 @@ class TestMangadex(cu2test.Cu2Test):
     def test_chapter_information_tomochan(self):
         URL = 'https://mangadex.org/chapter/28082'
         config.get().cbz = True
-        chapter = mangadex.MangadexChapter.from_url(URL)
+        chapter = mangadex_v5.MangadexV5Chapter.from_url(URL)
         self.assertEqual(chapter.alias, 'tomo-chan-wa-onna-no-ko')
         self.assertEqual(chapter.chapter, '1')
         self.assertEqual(chapter.groups, ['M@STER Scans'])
@@ -149,7 +137,7 @@ class TestMangadex(cu2test.Cu2Test):
         URL = ''.join(['https://mangadex.org/chapter/',
                        '9999999999999999999999999999999999999999999999',
                        '99999999999999999999999'])
-        chapter = mangadex.MangadexChapter(url=URL)
+        chapter = mangadex_v5.MangadexV5Chapter(url=URL)
         self.assertFalse(chapter.available())
 
     def test_series_aria(self):
@@ -162,7 +150,7 @@ class TestMangadex(cu2test.Cu2Test):
                              '37.5', '38', '39', '40', '41', '42', '43', '44',
                              '45', '45.5', '46', '47', '48', '49', '50',
                              '50.5', '51', '52', '53', '54', '55', '56', '57',
-                             '57.5', '58', '59', '60', '60.5'],
+                             '57.5', '58', '59', '60', '60.1', '60.2'],
                 'groups': ['promfret', 'Amano Centric Scans'],
                 'name': 'Aria',
                 'url': 'https://mangadex.org/manga/2007'}
@@ -182,11 +170,11 @@ class TestMangadex(cu2test.Cu2Test):
         self.series_information_tester(data)
 
     def test_series_no_chapters(self):
-        data = {'alias': 'yorumori-no-kuni-no-sora-ni',
+        data = {'alias': 'boku-no-hero-academia',
                 'chapters': [],
                 'groups': [],
-                'name': 'Yorumori no Kuni no Sora ni',
-                'url': 'https://mangadex.org/manga/13004'}
+                'name': 'Boku no Hero Academia',
+                'url': 'https://mangadex.org/title/4f3bcae4-2d96-4c9d-932c-90181d9c873e'}
         self.series_information_tester(data)
 
 if __name__ == '__main__':

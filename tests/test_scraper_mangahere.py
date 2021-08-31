@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from cu2 import config, exceptions, output
 from nose.tools import nottest
 from urllib.parse import urljoin
-import cu2test
+import tests.cu2test as cu2test
 import os
 import requests
 import unittest

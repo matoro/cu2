@@ -1,6 +1,6 @@
 from cu2 import config
 from cu2 import exceptions
-import cu2test
+import tests.cu2test as cu2test
 
 
 class TestCLIConfig(cu2test.Cu2CLITest):

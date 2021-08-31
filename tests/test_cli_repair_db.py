@@ -1,5 +1,5 @@
 from cu2 import sanity
-import cu2test
+import tests.cu2test as cu2test
 import os
 
 

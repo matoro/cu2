@@ -11,6 +11,7 @@ import requests
 
 class FoOlSlideSeries(BaseSeries, metaclass=ABCMeta):
     def __init__(self, url, directory=None, stub=None, use_https=False):
+        super().__init__(url, directory=directory, stub=stub, use_https=use_https)
         self.url = url
         self.directory = directory
         self.stub = stub

@@ -1,5 +1,5 @@
 from cu2 import exceptions
-from cu2test import Cu2Test
+from tests.cu2test import Cu2Test as Cu2Test
 import os
 import zipfile
 

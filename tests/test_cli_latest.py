@@ -1,5 +1,5 @@
 from unittest import mock
-import cu2test
+import tests.cu2test as cu2test
 import datetime
 import time
 

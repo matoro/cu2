@@ -1,15 +1,14 @@
 from bs4 import BeautifulSoup
-from cu2 import config, exceptions, output
+from cu2 import config, exceptions, output, version
 from json import loads
 from nose.tools import nottest
 from re import search
 from urllib.parse import urljoin
-import cu2test
+import tests.cu2test as cu2test
 import os
 import requests
 import unittest
 import zipfile
-
 
 class TestMangasee(cu2test.Cu2Test):
     MANGASEE_URL = 'https://mangasee123.com'
@@ -23,10 +22,11 @@ class TestMangasee(cu2test.Cu2Test):
         self.directory.cleanup()
 
     def get_five_latest_releases(self):
-        r = requests.get(self.MANGASEE_URL + "/hot.php")
+        r = requests.get(self.MANGASEE_URL + "/hot.php", headers = { "User-Agent": version.version_string() })
+        self.assertEqual(r.status_code, 200)
         soup = BeautifulSoup(r.text, config.get().html_parser)
         hot_update_json = loads(search(r"vm.HotUpdateJSON = (\[.+?\]);",
-                          str(soup.find_all("script")[-2].contents)).groups()[0].replace("\\", ""));
+                          str(soup.find_all("script")[-1].contents)).groups()[0].replace("\\", ""));
         links = []
         for update in hot_update_json[0:5]:
             links.append(self.MANGASEE_URL + "/read-online/" + update["IndexName"] + \

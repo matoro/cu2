@@ -24,6 +24,8 @@ class MadokamiSeries(BaseSeries):
         self.chapters = self.get_chapters()
 
     def get_chapters(self):
+        output.error(self.alias + ": Madokami no longer supported")
+        raise exceptions.ScrapingError
         try:
             rows = (self.soup
                     .find('table', class_='mobile-files-table')

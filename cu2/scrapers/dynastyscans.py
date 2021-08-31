@@ -76,7 +76,7 @@ class DynastyScansChapter(BaseChapter):
         url = url.replace('http://', 'https://')
         if url.endswith('/'):
             url = url[:-1]
-        j = self.req_session.get(url + '.json').json()
+        j = requests.get(url + '.json').json()
         author_link = None
         for t in j['tags']:
             if t['type'] == 'Series':

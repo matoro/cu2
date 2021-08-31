@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from cu2 import config, exceptions, output
+from cu2 import config, exceptions, output, version
 from cu2.scrapers.base import BaseChapter, BaseSeries, download_pool
 from functools import partial
 import concurrent.futures
@@ -46,7 +46,7 @@ class MangaseeSeries(BaseSeries):
 
     def __init__(self, url, **kwargs):
         super().__init__(url, **kwargs)
-        spage = self.req_session.get(url)
+        spage = self.req_session.get(url, headers = { "User-Agent": version.version_string() })
         if spage.status_code == 404:
             raise exceptions.ScrapingError
         self.soup = BeautifulSoup(spage.text, config.get().html_parser)
@@ -61,16 +61,16 @@ class MangaseeSeries(BaseSeries):
         # for bad series URLs
         try:
             index_name = re.search(r"vm\.IndexName = \"(.+?)\";",
-                                    str(self.soup.find_all("script")[-2].contents)).groups()[0]
+                                    str(self.soup.find_all("script")[-1].contents)).groups()[0]
         except AttributeError:
             output.error(self.alias + ': Unable to extract series index name')
             raise exceptions.ScrapingError
         chap_codes = re.findall(r"\"Chapter\":\"([0-9]+?)\"",
-                                str(self.soup.find_all("script")[-2].contents))
+                                str(self.soup.find_all("script")[-1].contents))
         chap_types = re.findall(r"\"Type\":\"(.+?)\"",
-                                str(self.soup.find_all("script")[-2].contents))
+                                str(self.soup.find_all("script")[-1].contents))
         chap_dates = re.findall(r"\"Date\":\"(.+?)\"",
-                                str(self.soup.find_all("script")[-2].contents))
+                                str(self.soup.find_all("script")[-1].contents))
         chapters = []
         season_names = []
         for i, chap_code in enumerate(chap_codes):
@@ -138,17 +138,17 @@ class MangaseeChapter(BaseChapter):
 
     def download(self):
         if not getattr(self, "cpage", None):
-            self.cpage = self.req_session.get(self.url)
+            self.cpage = self.req_session.get(self.url, headers = { "User-Agent": version.version_string() })
         if not getattr(self, "soup", None):
             self.soup = BeautifulSoup(self.cpage.text,
                                       config.get().html_parser)
 
         current_chap_code = re.search(r"vm.CurChapter = {\"Chapter\":\"([0-9]+)\"", \
-                            str(self.soup.find_all("script")[-2].contents)).groups()[0]
+                            str(self.soup.find_all("script")[-1].contents)).groups()[0]
         chap_codes = re.findall(r"\"Chapter\":\"([0-9]+?)\"",
-                                str(self.soup.find_all("script")[-2].contents))
+                                str(self.soup.find_all("script")[-1].contents))
         chap_pages = re.findall(r"\"Page\":\"([0-9]+?)\"",
-                                str(self.soup.find_all("script")[-2].contents))
+                                str(self.soup.find_all("script")[-1].contents))
 
         # find number of pages in this chapter
         num_pages = 0
@@ -173,7 +173,7 @@ class MangaseeChapter(BaseChapter):
         # which seems to be used for multi-season works.  it is an empty string for
         # non-multi-season works.
         directory = re.search(r"vm.CurChapter.+?\"Directory\":\"(.*?)\"", \
-                              str(self.soup.find_all("script")[-2].contents)).groups()[0]
+                              str(self.soup.find_all("script")[-1].contents)).groups()[0]
         if directory == "":
             directory = "/"
         else:
@@ -182,11 +182,11 @@ class MangaseeChapter(BaseChapter):
         # second is the domain name the images are hosted on.  they have been moved off of
         # blogspot and now use cycle round-robin to servers behind cloudflare.
         domain = re.search(r"vm.CurPathName = \"(.+?)\";", \
-                           str(self.soup.find_all("script")[-2].contents)).groups()[0]
+                           str(self.soup.find_all("script")[-1].contents)).groups()[0]
 
         # third is the index name.
         index_name = re.search(r"vm\.IndexName = \"(.+?)\";",
-                                str(self.soup.find_all("script")[-2].contents)).groups()[0]
+                                str(self.soup.find_all("script")[-1].contents)).groups()[0]
 
         # now we're finally read to start assembling the image urls.
         pages = []
@@ -222,7 +222,7 @@ class MangaseeChapter(BaseChapter):
             self.create_zip(files)
 
     def from_url(url):
-        cpage = requests.get(url)
+        cpage = requests.get(url, headers = { "User-Agent": version.version_string() })
         soup = BeautifulSoup(cpage.text, config.get().html_parser)
         iname = soup.find("a", class_="btn btn-sm btn-outline-secondary")["href"]
         series = MangaseeSeries("https://mangasee123.com" + iname)
@@ -234,7 +234,7 @@ class MangaseeChapter(BaseChapter):
     # new site no longer returns 404 on bad chapter
     def available(self):
         if not getattr(self, "cpage", None):
-            self.cpage = self.req_session.get(self.url)
+            self.cpage = self.req_session.get(self.url, headers = { "User-Agent": version.version_string() })
         if not getattr(self, "soup", None):
             self.soup = BeautifulSoup(self.cpage.text,
                                       config.get().html_parser)

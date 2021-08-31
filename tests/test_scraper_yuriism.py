@@ -1,5 +1,5 @@
 from cu2 import exceptions
-from cu2test import Cu2Test
+from tests.cu2test import Cu2Test as Cu2Test
 import os
 import zipfile
 
@@ -12,7 +12,7 @@ class TestDokiReader(Cu2Test):
 
     def test_chapter_kancolle_2(self):
         URL = 'http://www.yuri-ism.net/slide/read/kancolle/en/6/2/page/1'
-        URL_SHORT = 'http://www.yuri-ism.net/slide/read/kancolle/en/6/2/'
+        URL_SHORT = 'https://www.yuri-ism.net/slide/read/kancolle/en/6/2/'
         ALIAS = 'kancolle'
         NAME = 'Kancolle'
         chapter = yuriism.YuriismChapter.from_url(URL)

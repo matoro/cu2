@@ -126,7 +126,11 @@ class MadokamiConfig(object):
 
 def get():
     """Returns the active config object."""
-    return _config
+    try:
+        return _config
+    except NameError:
+        initialize()
+        return _config
 
 
 def initialize(directory=None):
