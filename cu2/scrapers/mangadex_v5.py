@@ -5,9 +5,12 @@ from functools import partial
 from tempfile import NamedTemporaryFile
 from cu2.version import __version__, __upstream_link__
 
+debug = False
+
 def _make_api_request(url, session = None, extra_headers = { }):
     while True:
-        output.warning("Mangadex API: requesting -> " + url)
+        if debug:
+            output.warning("Mangadex API: requesting -> " + url)
         try:
             if session:
                 r = session.get('https://api.mangadex.org/' + url.strip('/'), headers = { **MangadexV5Series.headers, **extra_headers })
@@ -19,11 +22,9 @@ def _make_api_request(url, session = None, extra_headers = { }):
         if r.status_code == 200:
             return r
         elif r.status_code == 429:
-            end_of_ratelimit_period = int(r.headers["X-RateLimit-Retry-After"])
-            current_timestamp = int(time.time())
-            seconds_to_wait = end_of_ratelimit_period - current_timestamp
-            output.warning("Mangadex API: wait {} seconds...".format(seconds_to_wait))
-            time.sleep(seconds_to_wait)
+            retry_delay = int(r.headers["retry-after"])
+            output.warning("Mangadex API: wait {} seconds...".format(retry_delay))
+            time.sleep(retry_delay)
         else:
             output.error("Mangadex API: got bad status code {}".format(r.status_code))
             return r
@@ -54,7 +55,7 @@ def _decode_json(string):
         raise exceptions.ScrapingError
 
 class MangadexV5Series(BaseSeries):
-    url_re = re.compile(r'^https?://mangadex\.org/(title/[0-9a-fA-F]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}|manga/[0-9]+)$')
+    url_re = re.compile(r'^https?://mangadex\.org/(title/[0-9a-fA-F]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}|manga/[0-9]+|title/[0-9]+/.+(/chapters/?)?)$')
     headers = { "User-Agent": "cu2/{} {}".format(__version__, __upstream_link__) }
 
     def __init__(self, url, **kwargs):
@@ -62,10 +63,15 @@ class MangadexV5Series(BaseSeries):
         self._get_page(self.url)
         self.chapters = self.get_chapters()
 
+    def __del__(self):
+        self.req_session.close()
+
     @staticmethod
     def _translate_manga_id(manga_id):
         try:
             legacy_manga_id = int(manga_id)
+            if debug:
+                output.warning("Mangadex API: querying legacy series {} -> /legacy/mapping".format(str(legacy_manga_id)))
             r = requests.post("https://api.mangadex.org/legacy/mapping", json = { "type": "manga", "ids": [ legacy_manga_id ] })
             try:
                 return r.json()[0]["data"]["attributes"]["newId"]
@@ -75,7 +81,15 @@ class MangadexV5Series(BaseSeries):
             return manga_id
 
     def _get_page(self, url):
-        r = _make_api_request('/manga/' + MangadexV5Series._translate_manga_id(url.split('/')[-1]), session = self.req_session)
+        if len(url.rstrip('/').split('/')) == 7:
+            manga_id = MangadexV5Series._translate_manga_id(url.rstrip('/').split('/')[-3])
+        elif len(url.rstrip('/').split('/')) == 6:
+            manga_id = MangadexV5Series._translate_manga_id(url.rstrip('/').split('/')[-2])
+        elif url.rstrip('/').split('/')[-1].isdigit():
+            manga_id = MangadexV5Series._translate_manga_id(url.rstrip('/').split('/')[-1])
+        else:
+            manga_id = url.rstrip('/').split('/')[-1]
+        r = _make_api_request('/manga/' + manga_id, session = self.req_session)
         # this bit is duplicated in _decode_json because at this point we don't have
         # enough data from the API to call self.alias
         try:
@@ -122,6 +136,9 @@ class MangadexV5Chapter(BaseChapter):
     url_re = re.compile(r'^https://mangadex\.org/chapter/[0-9a-fA-F]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$')
     uses_pages = True
 
+    def __del__(self):
+        self.req_session.close()
+
     @staticmethod
     def page_download_task(page_num, r, page_url = None):
         ext = BaseChapter.guess_extension(r.headers.get("content-type"))
@@ -134,6 +151,8 @@ class MangadexV5Chapter(BaseChapter):
         except ConnectionError:
             f.flush()
             # page failed to download, send failure report
+            if debug:
+                output.warning("Mangadex API: send failure report")
             requests.post("https://api.mangadex.network/report", data =
                 {
                     "url": page_url,
@@ -146,6 +165,8 @@ class MangadexV5Chapter(BaseChapter):
             raise exceptions.ScrapingError
         f.flush()
         # page download successful, send success report
+        if debug:
+            output.warning("Mangadex API: send success report")
         requests.post("https://api.mangadex.network/report", data =
             {
                 "url": page_url,
@@ -163,6 +184,8 @@ class MangadexV5Chapter(BaseChapter):
     def _translate_chapter_id(chapter_id):
         try:
             legacy_chapter_id = int(chapter_id)
+            if debug:
+                output.warning("Mangadex API: querying legacy chapter {} -> /legacy/mapping".format(str(legacy_chapter_id)))
             r = requests.post("https://api.mangadex.org/legacy/mapping", json = { "type": "chapter", "ids": [ legacy_chapter_id ] })
             try:
                 return r.json()[0]["data"]["attributes"]["newId"]

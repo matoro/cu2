@@ -133,6 +133,11 @@ class TestMangadexV5(cu2test.Cu2Test):
             files = chapter_zip.infolist()
             self.assertEqual(len(files), 1)
 
+    def test_series_old_format(self):
+        URL = 'https://mangadex.org/title/4049/joou-no-hana'
+        series = mangadex_v5.MangadexV5Series(URL)
+        self.assertEqual(series.alias, 'joou-no-hana')
+
     def test_chapter_unavailable(self):
         URL = ''.join(['https://mangadex.org/chapter/',
                        '9999999999999999999999999999999999999999999999',

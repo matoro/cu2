@@ -1,4 +1,4 @@
-from cu2 import db, config, output
+from cu2 import db, config, exceptions, output
 from cu2.scrapers import chapter_scrapers, series_scrapers
 import click
 import datetime
@@ -69,7 +69,8 @@ def series_by_url(url):
     for Series in series_scrapers:
         if re.match(Series.url_re, url):
             return Series(url)
-
+    output.error("Failed to find scraper matching URL: {}".format(url))
+    raise exceptions.ScrapingError
 
 def set_ignored(mark_ignored, alias, chapters):
     """Helper function for `cu2 ignore` and `cu2 unignore` commands, which will

@@ -195,7 +195,8 @@ class Chapter(Base):
         if alias:
             query = query.filter(Series.alias == alias)
         query = query.filter(Chapter.downloaded == 0).all()
-        return humansorted([x.to_object() for x in query],
+        # https://stackoverflow.com/a/1222717
+        return humansorted((x.to_object() for x in query if x.to_object() is not None),
                            key=lambda x: x.chapter)
 
     @property
@@ -228,8 +229,8 @@ class Chapter(Base):
             'api_id': self.api_id
         }
         if parse.netloc in ('mangadex.com', 'mangadex.org'):
-            from cu2.scrapers.mangadex import MangadexChapter
-            return MangadexChapter(**kwargs)
+            from cu2.scrapers.mangadex_v5 import MangadexV5Chapter
+            return MangadexV5Chapter(**kwargs)
         if parse.netloc == 'dynasty-scans.com':
             from cu2.scrapers.dynastyscans import DynastyScansChapter
             return DynastyScansChapter(**kwargs)
@@ -248,9 +249,6 @@ class Chapter(Base):
         if parse.netloc in ('www.mangahere.cc', 'm.mangahere.cc'):
             from cu2.scrapers.mangahere import MangahereChapter
             return MangahereChapter(**kwargs)
-        if parse.netloc == 'manganelo.com':
-            from cu2.scrapers.manganelo import ManganeloChapter
-            return ManganeloChapter(**kwargs)
 
 class Group(Base):
     __tablename__ = 'groups'
