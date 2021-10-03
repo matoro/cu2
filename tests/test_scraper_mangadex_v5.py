@@ -22,9 +22,9 @@ class TestMangadexV5(cu2test.Cu2Test):
         self.directory.cleanup()
 
     def get_five_latest_releases(self):
-        return [ TestMangadexV5.MANGADEX_API_URL + "/chapter/" + x["data"]["id"] 
+        return [ TestMangadexV5.MANGADEX_API_URL + "/chapter/" + x["id"] 
             for x in mangadex_v5._decode_json(mangadex_v5._make_api_request(
-            "/chapter?order[publishAt]=desc&translatedLanguage[]=en&limit=5").text)["results"] ]
+            "/chapter?order[publishAt]=desc&translatedLanguage[]=en&limit=5").text) ]
 
     def series_information_tester(self, data):
         series = mangadex_v5.MangadexV5Series(data['url'])
@@ -52,7 +52,12 @@ class TestMangadexV5(cu2test.Cu2Test):
                 output.error('Scraping error for {} - {}'.format(release, e))
                 raise exceptions.ScrapingError
             else:
-                chapter.get(use_db=False)
+                try:
+                    chapter.get(use_db=False)
+                except exceptions.ScrapingError as e:
+                    if e.message == "external":
+                        continue
+                    raise e
 
     def test_chapter_filename_decimal(self):
         URL = 'https://mangadex.org/chapter/24779'

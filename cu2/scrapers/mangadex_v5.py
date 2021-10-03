@@ -39,20 +39,26 @@ def _make_paginated_api_request(url, session = None, extra_headers = { }):
         page = _make_api_request(url + "&offset=" + str(offset) + "&limit=" + str(limit),
             session = session, extra_headers = extra_headers)
         j = _decode_json(page.text)
-        if not j.get("total"):
-            return j["results"]
-        results += j["results"]
+        if not page.json().get("total"):
+            return j
+        results += j
         offset += 100
-        if offset >= j["total"]:
+        if offset >= page.json()["total"]:
             break
     return results
 
 def _decode_json(string):
     try:
-        return json.loads(string)
-    except json.decoder.JSONDecodeError:
-        output.error(self.alias + ": Mangadex API: failed to decode JSON response")
-        raise exceptions.ScrapingError
+        try:
+            return json.loads(string)["data"]
+        except json.decoder.JSONDecodeError:
+            output.error(self.alias + ": Mangadex API: failed to decode JSON response")
+            raise exceptions.ScrapingError
+        except KeyError:
+            output.error(self.alias + ": Mangadex API: request returned status: " + json.loads(string)["result"])
+            raise exceptions.ScrapingError
+    except NameError:
+        output.error("Mangadex API: request returned status: " + json.loads(string)["result"])
 
 class MangadexV5Series(BaseSeries):
     url_re = re.compile(r'^https?://mangadex\.org/(title/[0-9a-fA-F]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}|manga/[0-9]+|title/[0-9]+/.+(/chapters/?)?)$')
@@ -74,7 +80,7 @@ class MangadexV5Series(BaseSeries):
                 output.warning("Mangadex API: querying legacy series {} -> /legacy/mapping".format(str(legacy_manga_id)))
             r = requests.post("https://api.mangadex.org/legacy/mapping", json = { "type": "manga", "ids": [ legacy_manga_id ] })
             try:
-                return r.json()[0]["data"]["attributes"]["newId"]
+                return r.json()["data"][0]["attributes"]["newId"]
             except KeyError:
                 return "invalid"
         except ValueError:
@@ -105,7 +111,7 @@ class MangadexV5Series(BaseSeries):
         for group in groups:
             if not group in self.group_names:
                 r = _make_api_request("/group/" + group, session = self.req_session)
-                self.group_names[group] = _decode_json(r.text)["data"]["attributes"]["name"]
+                self.group_names[group] = _decode_json(r.text)["attributes"]["name"]
             ret_group_names.append(self.group_names[group])
         return ret_group_names
 
@@ -118,12 +124,12 @@ class MangadexV5Series(BaseSeries):
                 MangadexV5Chapter(
                     name = self.name,
                     alias = self.alias,
-                    chapter = chapter["data"]["attributes"]["chapter"],
-                    url = "https://mangadex.org/chapter/" + chapter["data"]["id"],
+                    chapter = chapter["attributes"]["chapter"],
+                    url = "https://mangadex.org/chapter/" + chapter["id"],
                     groups = self._get_group_names([ relationship["id"] for relationship in chapter["relationships"]
                         if relationship["type"] == "scanlation_group" ]),
-                    title = None if chapter["data"]["attributes"]["title"] == "" else chapter["data"]["attributes"]["title"],
-                    upload_date = chapter["data"]["attributes"]["updatedAt"]
+                    title = None if chapter["attributes"]["title"] == "" else chapter["attributes"]["title"],
+                    upload_date = chapter["attributes"]["updatedAt"]
                 )
             )
         return chapters
@@ -188,7 +194,7 @@ class MangadexV5Chapter(BaseChapter):
                 output.warning("Mangadex API: querying legacy chapter {} -> /legacy/mapping".format(str(legacy_chapter_id)))
             r = requests.post("https://api.mangadex.org/legacy/mapping", json = { "type": "chapter", "ids": [ legacy_chapter_id ] })
             try:
-                return r.json()[0]["data"]["attributes"]["newId"]
+                return r.json()["data"][0]["attributes"]["newId"]
             except KeyError:
                 return "invalid"
         except ValueError:
@@ -207,16 +213,19 @@ class MangadexV5Chapter(BaseChapter):
     def download(self):
         if not self.available():
             raise exceptions.ScrapingError
-        base_url = _decode_json(_make_api_request("/at-home/server/" + self.json["data"]["id"]).text)["baseUrl"]
-        pages = [ base_url + "/data/" + self.json["data"]["attributes"]["hash"] + "/" + x
-            for x in self.json["data"]["attributes"]["data"] ]
+        base_url = _make_api_request("/at-home/server/" + self.json["id"]).json()["baseUrl"]
+        pages = [ base_url + "/data/" + self.json["attributes"]["hash"] + "/" + x
+            for x in self.json["attributes"]["data"] ]
+        if len(pages) <= 0:
+            output.error("{}: chapter is hosted externally".format(self.alias))
+            raise exceptions.ScrapingError("external")
         files = [None] * len(pages)
         futures = []
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
                 r = self.req_session.get(page, stream = True)
                 if not r or r.status_code == 404:
-                    output.error(self.alias + ": failed request for page {}".format(i))
+                    output.error("{}: failed request for page {}".format(self.alias, i))
                     raise exceptions.ScrapingError
                 fut = download_pool.submit(self.page_download_task, i, r, page_url = page)
                 fut.add_done_callback(partial(self.page_download_finish, bar, files))
