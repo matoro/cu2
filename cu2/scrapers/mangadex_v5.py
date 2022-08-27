@@ -213,9 +213,9 @@ class MangadexV5Chapter(BaseChapter):
     def download(self):
         if not self.available():
             raise exceptions.ScrapingError
-        base_url = _make_api_request("/at-home/server/" + self.json["id"]).json()["baseUrl"]
-        pages = [ base_url + "/data/" + self.json["attributes"]["hash"] + "/" + x
-            for x in self.json["attributes"]["data"] ]
+        at_home_data = _make_api_request("/at-home/server/" + self.json["id"]).json()
+        pages = [ at_home_data["baseUrl"] + "/data/" + at_home_data["chapter"]["hash"] + "/" + x
+            for x in at_home_data["chapter"]["data"] ]
         if len(pages) <= 0:
             output.error("{}: chapter is hosted externally".format(self.alias))
             raise exceptions.ScrapingError("external")
@@ -223,7 +223,11 @@ class MangadexV5Chapter(BaseChapter):
         futures = []
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
-                r = self.req_session.get(page, stream = True)
+                try:
+                    r = self.req_session.get(page, stream = True)
+                except requests.exceptions.ConnectionError as e:
+                    output.error("{}: connection error for page {}".format(self.alias, i))
+                    raise exceptions.ScrapingError
                 if not r or r.status_code == 404:
                     output.error("{}: failed request for page {}".format(self.alias, i))
                     raise exceptions.ScrapingError
