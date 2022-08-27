@@ -3,7 +3,7 @@ from cu2.scrapers import chapter_scrapers, series_scrapers
 import click
 import datetime
 import re
-
+import shutil
 
 def chapter_by_url(url):
     """Helper function that iterates through the chapter scrapers defined in
@@ -55,7 +55,7 @@ def print_new_normal(items):
         minami-ke
         153  154  155  156  157
     """
-    width = click.get_terminal_size()[0]
+    width = shutil.get_terminal_size()[0]
     for series in items:
         click.secho(series[0], bold=True)
         click.echo(click.wrap_text(series[1], width=width))
