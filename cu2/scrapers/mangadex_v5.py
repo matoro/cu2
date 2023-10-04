@@ -116,7 +116,7 @@ class MangadexV5Series(BaseSeries):
         return ret_group_names
 
     def get_chapters(self):
-        chapter_data = _make_paginated_api_request('/chapter?translatedLanguage[]=en&manga=' + self.json["data"]["id"],
+        chapter_data = _make_paginated_api_request('/chapter?translatedLanguage[]=en&includeExternalUrl=0&manga=' + self.json["data"]["id"],
             session = self.req_session)
         chapters = []
         for chapter in chapter_data:

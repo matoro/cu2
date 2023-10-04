@@ -24,7 +24,7 @@ class TestMangadexV5(cu2test.Cu2Test):
     def get_five_latest_releases(self):
         return [ TestMangadexV5.MANGADEX_API_URL + "/chapter/" + x["id"] 
             for x in mangadex_v5._decode_json(mangadex_v5._make_api_request(
-            "/chapter?order[publishAt]=desc&translatedLanguage[]=en&limit=5").text) ]
+            "/chapter?order[publishAt]=desc&translatedLanguage[]=en&limit=5&includeExternalUrl=0").text) ]
 
     def series_information_tester(self, data):
         series = mangadex_v5.MangadexV5Series(data['url'])
@@ -161,7 +161,7 @@ class TestMangadexV5(cu2test.Cu2Test):
                              '45', '45.5', '46', '47', '48', '49', '50',
                              '50.5', '51', '52', '53', '54', '55', '56', '57',
                              '57.5', '58', '59', '60', '60.1', '60.2'],
-                'groups': ['promfret', 'Amano Centric Scans'],
+                'groups': ['promfret', 'Amano Centric Scans', 'INKR Comics'],
                 'name': 'Aria',
                 'url': 'https://mangadex.org/manga/2007'}
         self.series_information_tester(data)
@@ -180,10 +180,10 @@ class TestMangadexV5(cu2test.Cu2Test):
         self.series_information_tester(data)
 
     def test_series_no_chapters(self):
-        data = {'alias': 'boku-no-hero-academia',
+        data = {'alias': 'my-hero-academia',
                 'chapters': [],
                 'groups': [],
-                'name': 'Boku no Hero Academia',
+                'name': 'My Hero Academia',
                 'url': 'https://mangadex.org/title/4f3bcae4-2d96-4c9d-932c-90181d9c873e'}
         self.series_information_tester(data)
 
