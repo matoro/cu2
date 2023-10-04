@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from cu2 import config, exceptions, output, version
 from json import loads
-from nose.tools import nottest
+#from nose.tools import nottest
 from re import search
 from urllib.parse import urljoin
 import tests.cu2test as cu2test
@@ -36,21 +36,21 @@ class TestMangasee(cu2test.Cu2Test):
             raise exceptions.ScrapingError
         return links[:5]
 
-    @nottest
-    def series_information_tester(self, data):
-        series = mangasee.MangaseeSeries(data['url'])
-        self.assertEqual(series.name, data['name'])
-        self.assertEqual(series.alias, data['alias'])
-        self.assertEqual(series.url, data['url'])
-        self.assertIs(series.directory, None)
-        self.assertEqual(len(series.chapters), len(data['chapters']))
-        for chapter in series.chapters:
-            self.assertEqual(chapter.name, data['name'])
-            self.assertEqual(chapter.alias, data['alias'])
-            self.assertIn(chapter.chapter, data['chapters'])
-            data['chapters'].remove(chapter.chapter)
-            self.assertIs(chapter.directory, None)
-        self.assertEqual(len(data['chapters']), 0)
+    #@nottest
+    #def series_information_tester(self, data):
+    #    series = mangasee.MangaseeSeries(data['url'])
+    #    self.assertEqual(series.name, data['name'])
+    #    self.assertEqual(series.alias, data['alias'])
+    #    self.assertEqual(series.url, data['url'])
+    #    self.assertIs(series.directory, None)
+    #    self.assertEqual(len(series.chapters), len(data['chapters']))
+    #    for chapter in series.chapters:
+    #        self.assertEqual(chapter.name, data['name'])
+    #        self.assertEqual(chapter.alias, data['alias'])
+    #        self.assertIn(chapter.chapter, data['chapters'])
+    #        data['chapters'].remove(chapter.chapter)
+    #        self.assertIs(chapter.directory, None)
+    #    self.assertEqual(len(data['chapters']), 0)
 
     def test_chapter_download_latest(self):
         latest_releases = self.get_five_latest_releases()

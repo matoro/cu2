@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from cu2 import config, exceptions, output
-from nose.tools import nottest
+#from nose.tools import nottest
 from urllib.parse import urljoin
 import tests.cu2test as cu2test
 import os
@@ -29,21 +29,21 @@ class TestMangahere(cu2test.Cu2Test):
                          .find("a").get("href")) for x in chapters]
         return links[:5]
 
-    @nottest
-    def series_information_tester(self, data):
-        series = mangahere.MangahereSeries(data['url'])
-        self.assertEqual(series.name, data['name'])
-        self.assertEqual(series.alias, data['alias'])
-        self.assertEqual(series.url, data['url'])
-        self.assertIs(series.directory, None)
-        self.assertEqual(len(series.chapters), len(data['chapters']))
-        for chapter in series.chapters:
-            self.assertEqual(chapter.name, data['name'])
-            self.assertEqual(chapter.alias, data['alias'])
-            self.assertIn(chapter.chapter, data['chapters'])
-            data['chapters'].remove(chapter.chapter)
-            self.assertIs(chapter.directory, None)
-        self.assertEqual(len(data['chapters']), 0)
+    #@nottest
+    #def series_information_tester(self, data):
+    #    series = mangahere.MangahereSeries(data['url'])
+    #    self.assertEqual(series.name, data['name'])
+    #    self.assertEqual(series.alias, data['alias'])
+    #    self.assertEqual(series.url, data['url'])
+    #    self.assertIs(series.directory, None)
+    #    self.assertEqual(len(series.chapters), len(data['chapters']))
+    #    for chapter in series.chapters:
+    #        self.assertEqual(chapter.name, data['name'])
+    #        self.assertEqual(chapter.alias, data['alias'])
+    #        self.assertIn(chapter.chapter, data['chapters'])
+    #        data['chapters'].remove(chapter.chapter)
+    #        self.assertIs(chapter.directory, None)
+    #    self.assertEqual(len(data['chapters']), 0)
 
     # This test is disabled because I have discovered (via this test)
     # that for some series, the mobile links for chapters return 404s,
@@ -51,17 +51,17 @@ class TestMangahere(cu2test.Cu2Test):
     # chapters unavailable via mobile.  Until I can get around to
     # reverse-engineering the obfuscation on the desktop site,
     # some series may not be able to be downloaded/followed.
-    @nottest
-    def test_chapter_download_latest(self):
-        latest_releases = self.get_five_latest_releases()
-        for release in latest_releases:
-            try:
-                chapter = mangahere.MangahereChapter.from_url(release)
-            except exceptions.ScrapingError as e:
-                output.error('Scraping error for {} - {}'.format(release, e))
-                raise exceptions.ScrapingError
-            else:
-                chapter.get(use_db=False)
+    #@nottest
+    #def test_chapter_download_latest(self):
+    #    latest_releases = self.get_five_latest_releases()
+    #    for release in latest_releases:
+    #        try:
+    #            chapter = mangahere.MangahereChapter.from_url(release)
+    #        except exceptions.ScrapingError as e:
+    #            output.error('Scraping error for {} - {}'.format(release, e))
+    #            raise exceptions.ScrapingError
+    #        else:
+    #            chapter.get(use_db=False)
 
     def test_chapter_filename_decimal(self):
         URL = "https://www.mangahere.cc/manga/citrus_saburouta/"
