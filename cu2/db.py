@@ -12,8 +12,7 @@ from sqlalchemy import (
     String,
     Table
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 from urllib.parse import urlparse
 import click
@@ -273,7 +272,7 @@ def backup_database():
 def initialize():
     global db_path, engine, session
     db_path = os.path.join(config.cu2_dir, 'cu2.db')
-    db_url = sqlalchemy.engine.url.URL('sqlite', database=db_path)
+    db_url = sqlalchemy.engine.url.URL.create('sqlite', database=db_path)
     engine = create_engine(db_url)
     if not os.path.exists(db_path):
         Base.metadata.create_all(bind=engine)
