@@ -29,6 +29,7 @@ class MangahereSeries(BaseSeries):
     url_re = re.compile(r'https?://((www|m)\.)?mangahere\.cc/manga/.+')
 
     def __init__(self, url, **kwargs):
+        raise exceptions.ScrapingError("Mangahere is no longer supported")
         super().__init__(url, **kwargs)
         # convert desktop link to mobile
         # bypasses adult content warning js
