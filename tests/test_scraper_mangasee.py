@@ -36,21 +36,20 @@ class TestMangasee(cu2test.Cu2Test):
             raise exceptions.ScrapingError
         return links[:5]
 
-    #@nottest
-    #def series_information_tester(self, data):
-    #    series = mangasee.MangaseeSeries(data['url'])
-    #    self.assertEqual(series.name, data['name'])
-    #    self.assertEqual(series.alias, data['alias'])
-    #    self.assertEqual(series.url, data['url'])
-    #    self.assertIs(series.directory, None)
-    #    self.assertEqual(len(series.chapters), len(data['chapters']))
-    #    for chapter in series.chapters:
-    #        self.assertEqual(chapter.name, data['name'])
-    #        self.assertEqual(chapter.alias, data['alias'])
-    #        self.assertIn(chapter.chapter, data['chapters'])
-    #        data['chapters'].remove(chapter.chapter)
-    #        self.assertIs(chapter.directory, None)
-    #    self.assertEqual(len(data['chapters']), 0)
+    def series_information_tester(self, data):
+        series = mangasee.MangaseeSeries(data['url'])
+        self.assertEqual(series.name, data['name'])
+        self.assertEqual(series.alias, data['alias'])
+        self.assertEqual(series.url, data['url'])
+        self.assertIs(series.directory, None)
+        self.assertEqual(len(series.chapters), len(data['chapters']))
+        for chapter in series.chapters:
+            self.assertEqual(chapter.name, data['name'])
+            self.assertEqual(chapter.alias, data['alias'])
+            self.assertIn(chapter.chapter, data['chapters'])
+            data['chapters'].remove(chapter.chapter)
+            self.assertIs(chapter.directory, None)
+        self.assertEqual(len(data['chapters']), 0)
 
     def test_chapter_download_latest(self):
         latest_releases = self.get_five_latest_releases()
@@ -160,14 +159,16 @@ class TestMangasee(cu2test.Cu2Test):
     def test_series_oneword(self):
         data = {'alias': 'aria',
                 'chapters': ['1', '2', '3', '4', '5', '6', '7', '8',
-                             '9', '10', '10.5', '11', '12', '13', '14', '15',
+                             '9', '10', '11', '12', '13', '14', '15',
                              '16', '17', '18', '19', '20', '21', '22', '23',
-                             '24', '25', '26', '27', '28', '29', '30', '30.5',
-                             '31', '32', '33', '34', '35', '35.5', '36',
-                             '37', '37.5', '38', '39', '40', '41', '42', '43',
-                             '44', '45', '45.5', '46', '47', '48', '49',
-                             '50', '50.5', '51', '52', '53', '54', '55', '56',
-                             '57', '57.5', '58', '59', '60', '60.5'],
+                             '24', '25', '26', '27', '27.5', '28', '29', '30',
+                             '31', '32', '33', '34', '35', '36',
+                             '37', '38', '39', '40', '41', '42', '43',
+                             '44', '45', '46', '47', '47.5', '48', '49',
+                             '50', '51', '52', '53', '54', '55', '56',
+                             '56.5', '57', '58', '59', '60', '60.5',
+                             '61', '62', '63', '64', '65', '66', '67', '67.5',
+                             '68', '69', '70'],
                 'name': 'Aria',
                 'url': self.MANGASEE_URL + '/manga/Aria'}
         self.series_information_tester(data)
