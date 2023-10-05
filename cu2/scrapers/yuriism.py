@@ -1,3 +1,4 @@
+from cu2 import exceptions
 from cu2.scrapers.foolslide import FoOlSlideChapter, FoOlSlideSeries
 import re
 
@@ -13,6 +14,7 @@ class YuriismSeries(FoOlSlideSeries):
             return 'http://www.yuri-ism.net/slide/'
 
     def get_chapters(self):
+        raise exceptions.ScrapingError("Yuriism is no longer supported")
         return super().get_chapters(YuriismChapter)
 
 
