@@ -25,7 +25,8 @@ class BaseSeries(metaclass=ABCMeta):
         self.req_session = requests.Session()
 
     def __del__(self):
-        self.req_session.close()
+        if hasattr(self, "req_session"):
+            self.req_session.close()
 
     @property
     def alias(self):
@@ -97,7 +98,7 @@ class BaseChapter(metaclass=ABCMeta):
         self.title = kwargs.get('title', None)
         self.url = kwargs.get('url')
         self.groups = kwargs.get('groups', None)
-        self.directory = kwargs.get('directory', None)
+        self.directory = self._strip_unwanted_characters(kwargs.get('directory', None))
         self.req_session = requests.Session()
 
     def __del__(self):
@@ -105,6 +106,8 @@ class BaseChapter(metaclass=ABCMeta):
 
     def _strip_unwanted_characters(self, path):
         """Strips unwanted characters from paths or filenames."""
+        if path == None:
+            return None
         KEEP_CHARACTERS = [' ', '.', '-', '_', '[', ']', '/', "'"]
         path_start = None
         if sys.platform in ['cygwin', 'win32']:

@@ -66,24 +66,24 @@ class TestDynastyScans(Cu2Test):
             self.assertEqual(len(files), 23)
 
     def test_chapter_no_series_or_artist(self):
-        URL = 'https://dynasty-scans.com/chapters/troubled_mutsuki_chan/'
-        NAME = 'Troubled Mutsuki-Chan'
+        URL = 'https://dynasty-scans.com/chapters/cover_extras_table_of_contents/'
+        NAME = 'Cover + Extras + Table of Contents'
         chapter = dynastyscans.DynastyScansChapter.from_url(URL)
         self.assertIs(chapter.alias, None)
         self.assertTrue(chapter.available())
         self.assertEqual(chapter.chapter, '0')
         self.assertIs(chapter.directory, None)
-        self.assertEqual(chapter.groups, ['Anonymous'])
+        self.assertEqual(chapter.groups, ['Scanaloupe'])
         self.assertEqual(chapter.name, NAME)
         self.assertEqual(chapter.url, URL[:-1])
-        path = os.path.join(self.directory.name, NAME,
-                            'Troubled Mutsuki-Chan - c000 [Anonymous].zip')
+        path = os.path.join(self.directory.name, chapter._strip_unwanted_characters(NAME),
+                            'Cover Extras Table of Contents - c000 [Scanaloupe].zip')
         self.assertEqual(chapter.filename, path)
         chapter.download()
         self.assertTrue(os.path.isfile(path))
         with zipfile.ZipFile(path) as chapter_zip:
             files = chapter_zip.infolist()
-            self.assertEqual(len(files), 8)
+            self.assertEqual(len(files), 7)
 
     def test_series_lily_love(self):
         ALIAS = 'lily-love'

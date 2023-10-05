@@ -1,5 +1,5 @@
 from click.testing import CliRunner
-from cu2 import config, cu2
+from cu2 import config, cu2, db
 from shutil import copyfile
 import os
 import tempfile
@@ -42,6 +42,10 @@ class Cu2Test(unittest.TestCase):
         config.get().write()
         self.runner = CliRunner()
 
+    def __del__(self):
+        if hasattr(self, "directory"):
+            self.directory.cleanup()
+
 
 class Cu2CLITest(Cu2Test):
     def setUp(self):
@@ -81,6 +85,7 @@ class Cu2CLITest(Cu2Test):
             return scrapers.base.BaseSeries.follow(series, *args, **kwargs)
         series.follow = follow
         series.name = name
+        db.session.add(series)
         return series
 
     def invoke(self, *arguments, **kwargs):
