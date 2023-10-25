@@ -124,7 +124,7 @@ class MangadexV5Series(BaseSeries):
                 MangadexV5Chapter(
                     name = self.name,
                     alias = self.alias,
-                    chapter = chapter["attributes"]["chapter"],
+                    chapter = chapter["attributes"]["chapter"] if chapter["attributes"]["chapter"] is not None else "0",
                     url = "https://mangadex.org/chapter/" + chapter["id"],
                     groups = self._get_group_names([ relationship["id"] for relationship in chapter["relationships"]
                         if relationship["type"] == "scanlation_group" ]),

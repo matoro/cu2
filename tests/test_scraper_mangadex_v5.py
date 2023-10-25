@@ -198,5 +198,12 @@ class TestMangadexV5(cu2test.Cu2Test):
                 'url': 'https://mangadex.org/title/09a5f228-f6b2-42a0-9d37-f661ebc6ad35/hatenkou-yuugi'}
         self.series_information_tester(data)
 
+    def test_chapter_zero(self):
+        URL = 'https://mangadex.org/chapter/4e163f46-e47e-4bd4-aa25-055718862d76'
+        chapter = mangadex_v5.MangadexV5Chapter.from_url(URL)
+        self.assertTrue(chapter.available())
+        self.assertEqual(chapter.title, 'Oneshot - ZONE')
+        self.assertEqual(chapter.chapter, '0')
+
 if __name__ == '__main__':
     unittest.main()
