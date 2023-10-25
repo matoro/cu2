@@ -28,20 +28,25 @@ class TestMangadexV5(cu2test.Cu2Test):
 
     def series_information_tester(self, data):
         series = mangadex_v5.MangadexV5Series(data['url'])
-        self.assertEqual(series.name, data['name'])
-        self.assertEqual(series.alias, data['alias'])
-        self.assertEqual(series.url, data['url'])
+        if "name" in data:
+            self.assertEqual(series.name, data['name'])
+        if "alias" in data:
+            self.assertEqual(series.alias, data['alias'])
+        if "url" in data:
+            self.assertEqual(series.url, data['url'])
         self.assertIs(series.directory, None)
-        self.assertEqual(len(series.chapters), len(data['chapters']))
-        for chapter in series.chapters:
-            self.assertEqual(chapter.name, data['name'])
-            self.assertEqual(chapter.alias, data['alias'])
-            self.assertIn(chapter.chapter, data['chapters'])
-            data['chapters'].remove(chapter.chapter)
-            for group in chapter.groups:
-                self.assertIn(group, data['groups'])
-            self.assertIs(chapter.directory, None)
-        self.assertEqual(len(data['chapters']), 0)
+        if "chapters" in data:
+            self.assertEqual(len(series.chapters), len(data['chapters']))
+            for chapter in series.chapters:
+                self.assertEqual(chapter.name, data['name'])
+                self.assertEqual(chapter.alias, data['alias'])
+                self.assertIn(chapter.chapter, data['chapters'])
+                data['chapters'].remove(chapter.chapter)
+                if "groups" in data:
+                    for group in chapter.groups:
+                        self.assertIn(group, data['groups'])
+                self.assertIs(chapter.directory, None)
+            self.assertEqual(len(data['chapters']), 0)
 
     def test_chapter_download_latest(self):
         latest_releases = self.get_five_latest_releases()
@@ -185,6 +190,12 @@ class TestMangadexV5(cu2test.Cu2Test):
                 'groups': [],
                 'name': 'My Hero Academia',
                 'url': 'https://mangadex.org/title/4f3bcae4-2d96-4c9d-932c-90181d9c873e'}
+        self.series_information_tester(data)
+
+    def test_series_trailing_name(self):
+        data = {'alias': 'hatenkou-yuugi',
+                'name': 'Hatenkou Yuugi',
+                'url': 'https://mangadex.org/title/09a5f228-f6b2-42a0-9d37-f661ebc6ad35/hatenkou-yuugi'}
         self.series_information_tester(data)
 
 if __name__ == '__main__':

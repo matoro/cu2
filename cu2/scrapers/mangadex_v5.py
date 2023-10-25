@@ -61,7 +61,7 @@ def _decode_json(string):
         output.error("Mangadex API: request returned status: " + json.loads(string)["result"])
 
 class MangadexV5Series(BaseSeries):
-    url_re = re.compile(r'^https?://mangadex\.org/(title/[0-9a-fA-F]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}|manga/[0-9]+|title/[0-9]+/.+(/chapters/?)?)$')
+    url_re = re.compile(r'^https?://mangadex\.org/(title/[0-9a-fA-F]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}(/.+)?|manga/[0-9]+|title/[0-9]+/.+(/chapters/?)?)$')
     headers = { "User-Agent": "cu2/{} {}".format(__version__, __upstream_link__) }
 
     def __init__(self, url, **kwargs):
