@@ -1,6 +1,6 @@
 import click
 from math import ceil
-
+from shutil import get_terminal_size
 
 def chapter(msg):
     click.echo(
@@ -68,14 +68,14 @@ def even_columns(items, bold_first_column=False, separator_width=1):
         indent = len(item[0]) + padding + separator_width
         line = click.wrap_text(separator.join([first_column, item[1]]),
                                subsequent_indent=' ' * indent,
-                               width=click.get_terminal_size()[0])
+                               width=get_terminal_size()[0])
         click.echo(line)
 
 
 def list(items):
     """Print out a list of items in columns much like `ls` in bash."""
     if items:
-        width = click.get_terminal_size()[0]
+        width = get_terminal_size()[0]
         longest = len(max(items, key=len))
         columns = int(width // (longest + 0.5))
         rows = ceil(len(items) / columns)
