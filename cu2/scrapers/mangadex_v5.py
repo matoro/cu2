@@ -224,9 +224,12 @@ class MangadexV5Chapter(BaseChapter):
         with self.progress_bar(pages) as bar:
             for i, page in enumerate(pages):
                 try:
-                    r = self.req_session.get(page, stream = True)
+                    r = self.req_session.get(page, stream = True, timeout = 18)
                 except requests.exceptions.ConnectionError as e:
                     output.error("{}: connection error for page {}".format(self.alias, i))
+                    raise exceptions.ScrapingError
+                except requests.exceptions.ReadTimeout as e:
+                    output.error("{}: connection timed out for page {}".format(self.alias, i))
                     raise exceptions.ScrapingError
                 if not r or r.status_code == 404:
                     output.error("{}: failed request for page {}".format(self.alias, i))
