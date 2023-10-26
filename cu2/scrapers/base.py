@@ -108,7 +108,7 @@ class BaseChapter(metaclass=ABCMeta):
         """Strips unwanted characters from paths or filenames."""
         if path == None:
             return None
-        KEEP_CHARACTERS = [' ', '.', '-', '_', '[', ']', '/', "'"]
+        KEEP_CHARACTERS = [' ', '.', '-', '_', '[', ']', '/', "'", "(", ")"]
         path_start = None
         if sys.platform in ['cygwin', 'win32']:
             KEEP_CHARACTERS += ['\\']
