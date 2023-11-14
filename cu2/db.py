@@ -248,6 +248,9 @@ class Chapter(Base):
         if parse.netloc in ('www.mangahere.cc', 'm.mangahere.cc'):
             from cu2.scrapers.mangahere import MangahereChapter
             return MangahereChapter(**kwargs)
+        if parse.netloc == 'ww7.mangakakalot.tv':
+            from cu2.scrapers.mangakakalot import MangakakalotChapter
+            return MangakakalotChapter(**kwargs)
 
 class Group(Base):
     __tablename__ = 'groups'

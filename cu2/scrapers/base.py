@@ -344,7 +344,7 @@ class BaseChapter(metaclass=ABCMeta):
             # the image from the beginning (easier than playing around with range
             # headers).  this means each thread may issue multiple new requests.
             # I have found the performance overhead to be mostly negligible.
-            except requests.exceptions.ChunkedEncodingError:
+            except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ReadTimeout):
                 if not page_url:
                     output.error("Connection killed on page {} but scraper does not support retries".format(str(page_num)))
                     raise exceptions.ScrapingError

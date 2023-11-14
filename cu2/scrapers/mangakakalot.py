@@ -1,0 +1,91 @@
+from cu2 import config, exceptions, output
+from cu2.scrapers.base import BaseChapter, BaseSeries, download_pool
+
+from bs4 import BeautifulSoup
+from functools import partial
+import concurrent.futures, re
+from requests import get
+from requests.adapters import HTTPAdapter, Retry
+
+class MangakakalotSeries(BaseSeries):
+    url_re = re.compile(r'^https?://ww7.mangakakalot.tv/manga/manga-[a-z]{2}[0-9]{6}$')
+
+    def __init__(self, url, **kwargs):
+        super().__init__(url, **kwargs)
+        self.chapters = self.get_chapters()
+
+    def __del__(self):
+        self.req_session.close()
+
+    def get_chapters(self):
+        chapters = []
+        req = self.req_session.get(self.url)
+        self.soup = BeautifulSoup(req.text, config.get().html_parser)
+        for chapter in self.soup.find("div", class_="chapter-list").find_all("a"):
+            chapters.append(
+                MangakakalotChapter(
+                    name = self.name,
+                    alias = self.alias,
+                    chapter = chapter["href"].split("-")[-1],
+                    groups = [],
+                    url = "https://ww7.mangakakalot.tv/" + chapter["href"],
+                    title = chapter.text.strip(),
+                    upload_date = chapter.parent.parent.find_all("span")[-1].text.strip()
+                )
+            )
+        return chapters
+
+    @property
+    def name(self):
+        return self.soup.find_all("span", itemprop = "title")[-1].text
+
+class MangakakalotChapter(BaseChapter):
+    url_re = re.compile(r'^https?://ww7.mangakakalot.tv/chapter/manga-[a-z]{2}[0-9]{6}/chapter-[0-9\.]+$')
+    uses_pages = True
+
+    def __del__(self):
+        self.req_session.close()
+
+    def available(self):
+        if not hasattr(self, "req"):
+            self.req = self.req_session.get(self.url)
+        return len(BeautifulSoup(self.req.text, config.get().html_parser).title.text) > 0
+
+    def download(self):
+        if not self.available():
+            raise exceptions.ScrapingError
+        pages = [ x["data-src"] for x in \
+            BeautifulSoup(self.req.text, \
+            config.get().html_parser).find("div", id = "vungdoc").find_all("img", class_="img-loading") ]
+        files = [None] * len(pages)
+        futures = []
+        self.req_session.mount( \
+            "/".join(pages[0].split("/")[:3]),
+            HTTPAdapter(max_retries = \
+                Retry(total = 6,
+                    backoff_factor = 2)))
+        with self.progress_bar(pages) as bar:
+            for i, page in enumerate(pages):
+                try:
+                    r = self.req_session.get(page, stream = True, timeout = 18)
+                except requests.exceptions.ConnectionError as e:
+                    output.error("{}: connection error for page {}".format(self.alias, i))
+                    raise exceptions.ScrapingError
+                except requests.exceptions.ReadTimeout as e:
+                    output.error("{}: connection timed out for page {}".format(self.alias, i))
+                    raise exceptions.ScrapingError
+                if r.status_code != 200:
+                    output.error("{}: failed request for page {} due to status {}".format(self.alias, i, r.status_code))
+                    raise exceptions.ScrapingError
+                fut = download_pool.submit(self.page_download_task, i, r, page_url = page)
+                fut.add_done_callback(partial(self.page_download_finish, bar, files))
+                futures.append(fut)
+            concurrent.futures.wait(futures)
+            self.create_zip(files)
+
+    def from_url(url):
+        series = MangakakalotSeries("https://ww7.mangakakalot.tv/manga/" + url.split("/")[-2])
+        for chapter in series.chapters:
+            if chapter.title == BeautifulSoup(get(url).text, config.get().html_parser).find_all("span", itemprop = "title")[-1].text:
+                return chapter
+        raise exceptions.ScrapingError
