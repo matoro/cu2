@@ -173,15 +173,19 @@ class MangadexV5Chapter(BaseChapter):
         # page download successful, send success report
         if debug:
             output.warning("Mangadex API: send success report")
-        requests.post("https://api.mangadex.network/report", data =
-            {
-                "url": page_url,
-                "success": True,
-                "bytes": f.tell(),
-                "duration": int(time.time()) - download_start_time,
-                "cached": True if r.headers.get("X-Cache") else False
-            }
-        )
+        try:
+            requests.post("https://api.mangadex.network/report", data =
+                {
+                    "url": page_url,
+                    "success": True,
+                    "bytes": f.tell(),
+                    "duration": int(time.time()) - download_start_time,
+                    "cached": True if r.headers.get("X-Cache") else False
+                },
+                timeout = 9
+            )
+        except requests.exceptions.ReadTimeout:
+            output.warning("Mangadex API: failed to send success report for page {}".format(page_num))
         f.close()
         r.close()
         return ((page_num, f))
