@@ -208,7 +208,7 @@ class MangaseeChapter(BaseChapter):
                             retries += 1
                         else:
                             break
-                    except requests.exceptions.ConnectionError:
+                    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
                         retries += 1
                 if r.status_code != 200:
                     output.error('Failed to fetch page with status {}, giving up'
