@@ -131,7 +131,7 @@ class MangaseeSeries(BaseSeries):
 
 
 class MangaseeChapter(BaseChapter):
-    url_re = re.compile((r'https?://mangaseeonline\.us/'
+    url_re = re.compile((r'https?://mangasee123\.com/'
                         r'read-online/.+-chapter-[0-9\.]+-page-[0-9]+\.html'))
     upload_date = None
     uses_pages = True
