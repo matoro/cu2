@@ -43,6 +43,9 @@ class MangakakalotChapter(BaseChapter):
     url_re = re.compile(r'^https?://ww7.mangakakalot.tv/chapter/manga-[a-z]{2}[0-9]{6}/chapter-[0-9\.]+$')
     uses_pages = True
 
+    def __init__(self):
+        raise exceptions.ScrapingError("Mangakakalot is no longer supported")
+
     def __del__(self):
         self.req_session.close()
 
