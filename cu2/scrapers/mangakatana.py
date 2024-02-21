@@ -6,6 +6,7 @@ from functools import partial
 import concurrent.futures, re
 from requests import get
 from requests.adapters import HTTPAdapter, Retry
+from requests.exceptions import ConnectionError, ReadTimeout
 
 class MangakatanaSeries(BaseSeries):
     url_re = re.compile(r'^https?://mangakatana.com/manga/[0-9a-z-]+\.[0-9]+$')
@@ -76,10 +77,10 @@ class MangakatanaChapter(BaseChapter):
             for i, page in enumerate(self.pages):
                 try:
                     r = self.req_session.get(page, stream = True, timeout = 18)
-                except requests.exceptions.ConnectionError as e:
+                except ConnectionError as e:
                     output.error("{}: connection error for page {}".format(self.alias, i))
                     raise exceptions.ScrapingError
-                except requests.exceptions.ReadTimeout as e:
+                except ReadTimeout as e:
                     output.error("{}: connection timed out for page {}".format(self.alias, i))
                     raise exceptions.ScrapingError
                 if r.status_code != 200:
