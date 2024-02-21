@@ -251,6 +251,9 @@ class Chapter(Base):
         if parse.netloc == 'ww7.mangakakalot.tv':
             from cu2.scrapers.mangakakalot import MangakakalotChapter
             return MangakakalotChapter(**kwargs)
+        if parse.netloc == 'mangakatana.com':
+            from cu2.scrapters.mangakatana import MangakatanaChapter
+            return MangakatanaChapter(**kwargs)
 
 class Group(Base):
     __tablename__ = 'groups'
