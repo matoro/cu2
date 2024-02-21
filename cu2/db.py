@@ -252,7 +252,7 @@ class Chapter(Base):
             from cu2.scrapers.mangakakalot import MangakakalotChapter
             return MangakakalotChapter(**kwargs)
         if parse.netloc == 'mangakatana.com':
-            from cu2.scrapters.mangakatana import MangakatanaChapter
+            from cu2.scrapers.mangakatana import MangakatanaChapter
             return MangakatanaChapter(**kwargs)
 
 class Group(Base):
