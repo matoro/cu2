@@ -23,20 +23,17 @@ class MangakatanaSeries(BaseSeries):
         req = self.req_session.get(self.url)
         self.soup = BeautifulSoup(req.text, config.get().html_parser)
         for chapter in self.soup.find("div", class_="chapters").find_all("a"):
-            try:
-                chapters.append(
-                    MangakatanaChapter(
-                        name = self.name,
-                        alias = self.alias,
-                        chapter = re.search(r"^Chapter ([0-9\.]+)", chapter.text).groups()[0],
-                        groups = [],
-                        url = chapter["href"],
-                        title = chapter.text,
-                        upload_date = chapter.parent.parent.parent.find("div", class_="update_time").text
-                    )
+            chapters.append(
+                MangakatanaChapter(
+                    name = self.name,
+                    alias = self.alias,
+                    chapter = re.search(r"^Chapter ([0-9\.]+)", chapter.text).groups()[0],
+                    groups = [],
+                    url = chapter["href"],
+                    title = chapter.text,
+                    upload_date = chapter.parent.parent.parent.find("div", class_="update_time").text
                 )
-            except AttributeError:
-                from pdb import set_trace ; set_trace()
+            )
         return chapters
 
     @property
