@@ -254,6 +254,9 @@ class Chapter(Base):
         if parse.netloc == 'mangakatana.com':
             from cu2.scrapers.mangakatana import MangakatanaChapter
             return MangakatanaChapter(**kwargs)
+        if parse.netloc == 'bato.to':
+            from cu2.scrapers.batoto_v3x import BatotoV3XChapter
+            return BatotoV3XChapter(**kwargs)
 
 class Group(Base):
     __tablename__ = 'groups'

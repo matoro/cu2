@@ -1,3 +1,4 @@
+from cu2.scrapers.batoto_v3x import BatotoV3XSeries, BatotoV3XChapter
 from cu2.scrapers.dokireader import DokiReaderSeries, DokiReaderChapter
 from cu2.scrapers.dynastyscans import DynastyScansChapter, DynastyScansSeries
 from cu2.scrapers.madokami import MadokamiChapter, MadokamiSeries
@@ -9,6 +10,7 @@ from cu2.scrapers.mangahere import MangahereSeries, MangahereChapter
 from cu2.scrapers.yuriism import YuriismChapter, YuriismSeries
 
 series_scrapers = [
+    BatotoV3XSeries,
     DokiReaderSeries,
     DynastyScansSeries,
     MadokamiSeries,
@@ -20,6 +22,7 @@ series_scrapers = [
     YuriismSeries,
 ]
 chapter_scrapers = [
+    BatotoV3XChapter,
     DokiReaderChapter,
     DynastyScansChapter,
     MadokamiChapter,
