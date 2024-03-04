@@ -56,23 +56,6 @@ class DatabaseSanity(object):
         self.test_old_domain('manga.madokami.com', 'manga.madokami.al')
         self.test_old_domain('mangadex.com', 'mangadex.org')
         self.test_old_domain('mangaseeonline.us', 'mangasee123.com')
-        self.test_batoto_follows()
-
-    def test_batoto_follows(self):
-        """Test that there are no Batoto follows in the database as the scraper
-        has been removed in cu2 v0.9.
-        """
-        global db
-        from cu2 import db
-        domain = 'bato.to'
-        condition = db.Series.url.ilike('%bato.to%')
-        try:
-            results = db.session.query(db.Series).filter(condition).all()
-        except SQLAlchemyError:
-            return
-        for result in results:
-            error = RemovedScraper(result, 'Batoto', domain)
-            self.errors.append(error)
 
     def test_columns(self, table):
         """Tests the columns in database table. If a column exists in the
