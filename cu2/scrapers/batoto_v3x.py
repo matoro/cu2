@@ -9,7 +9,7 @@ from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import ConnectionError, ReadTimeout
 
 class BatotoV3XSeries(BaseSeries):
-    url_re = re.compile(r'^https?://bato.to/[0-9]+(-[0-9\-a-z]+)?$')
+    url_re = re.compile(r'^https?://bato.to/title/[0-9]+(-[0-9\-a-z]+)?$')
 
     def __init__(self, url, **kwargs):
         super().__init__(url, **kwargs)
