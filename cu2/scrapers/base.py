@@ -321,6 +321,10 @@ class BaseChapter(metaclass=ABCMeta):
         sequential downloads in parallel.
         """
         ext = BaseChapter.guess_extension(r.headers.get('content-type'))
+        # For sites that return content-type application/octet-stream, fall
+        # back to extension from URL
+        if ext == ".bin":
+            ext = "." + page_url.split(".")[-1]
         f = NamedTemporaryFile(suffix=ext, delete=False)
         retries = 20
         while retries > 0:
