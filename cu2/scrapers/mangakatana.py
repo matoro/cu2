@@ -28,7 +28,7 @@ class MangakatanaSeries(BaseSeries):
                 MangakatanaChapter(
                     name = self.name,
                     alias = self.alias,
-                    chapter = re.search(r"^Chapter ([0-9\.]+)", chapter.text).groups()[0],
+                    chapter = re.search(r"^[a-zA-Z]+ ?([0-9\.]+)", chapter.text).groups()[0],
                     groups = [],
                     url = chapter["href"],
                     title = chapter.text,

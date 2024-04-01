@@ -42,5 +42,14 @@ class TestMangakatana(cu2test.Cu2Test):
             else:
                 chapter.get(use_db=False)
 
+    def test_bad_chapters(self):
+        # This has no space between the word "Chapter" and the number
+        chap = mangakatana.MangakatanaChapter.from_url("https://mangakatana.com/manga/martial-peak.20405/c1833")
+        self.assertEqual(chap.title, "Chapter1833: The Preciousness of Source Crystals")
+
+        # This has the word "Chapter" misspelled as "Chaprer"
+        chap = mangakatana.MangakatanaChapter.from_url("https://mangakatana.com/manga/martial-peak.20405/c441")
+        self.assertEqual(chap.title, "Chaprer 441")
+
 if __name__ == '__main__':
     unittest.main()
