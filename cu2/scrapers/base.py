@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from tempfile import NamedTemporaryFile
 import click
 import os
-import requests
+import requests, requests.adapters
 import sys
 import zipfile
 
@@ -23,6 +23,13 @@ class BaseSeries(metaclass=ABCMeta):
         self.url = url
         self.directory = kwargs.get('directory', None)
         self.req_session = requests.Session()
+        self.req_session.mount('https://',
+            requests.adapters.HTTPAdapter(
+                max_retries = requests.adapters.Retry(
+                    total = 5, backoff_factor = 2, status_forcelist = [ 502, 503, 504 ]
+                )
+            )
+        )
 
     def __del__(self):
         if hasattr(self, "req_session"):
