@@ -21,6 +21,7 @@ class MangakatanaSeries(BaseSeries):
     def get_chapters(self):
         chapters = []
         req = self.req_session.get(self.url)
+        req.raise_for_status()
         self.soup = BeautifulSoup(req.text, config.get().html_parser)
         for chapter in self.soup.find("div", class_="chapters").find_all("a"):
             chapters.append(
@@ -52,6 +53,7 @@ class MangakatanaChapter(BaseChapter):
             return self.pages
         if not hasattr(self, "req"):
             self.req = self.req_session.get(self.url)
+            self.req.raise_for_status()
         if not hasattr(self, "soup"):
             self.soup = BeautifulSoup(self.req.text, config.get().html_parser)
         return next(x.text for x in self.soup.find_all("script") if re.search("var thzq=", x.text)).splitlines()[7].split(";")[0][11:-2].replace("'", "").split(",")
@@ -59,6 +61,7 @@ class MangakatanaChapter(BaseChapter):
     def available(self):
         if not hasattr(self, "req"):
             self.req = self.req_session.get(self.url)
+            self.req.raise_for_status()
         if not hasattr(self, "soup"):
             self.soup = BeautifulSoup(self.req.text, config.get().html_parser)
         if not hasattr(self, "pages"):
